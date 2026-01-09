@@ -1,0 +1,8 @@
+out
+dist
+.claude
+src/typings/auto-imports.d.ts
+LICENSE.md
+tsconfig.json
+tsconfig.*.json
+pnpm-*.yaml

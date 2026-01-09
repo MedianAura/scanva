@@ -1,0 +1,17 @@
+{
+  "type": "parallel",
+  "actions": [
+    {
+      "label": "Checking with ESLint",
+      "command": "eslint . --format pretty --cache"
+    },
+    {
+      "label": "Checking with Prettier",
+      "command": "prettier --list-different --cache ."
+    },
+    {
+      "label": "Checking with TSC",
+      "command": "tsc --noEmit"
+    }
+  ]
+}
