@@ -1,4 +1,4 @@
-import { defineConfig, Level } from './src';
+import { defineConfig, Level } from './dist/index.js';
 
 export default defineConfig({
   rules: [
