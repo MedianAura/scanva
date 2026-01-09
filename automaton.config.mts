@@ -1,4 +1,4 @@
-import { defineConfig, getVersionPrompt } from './dist/index.js';
+import { defineConfig, getVersionPrompt } from '@medianaura/automaton';
 
 export default () => {
   return defineConfig({
@@ -17,7 +17,7 @@ export default () => {
           },
           {
             type: 'cmd',
-            cmd: 'npm run build',
+            cmd: 'automaton package',
           },
           {
             type: 'cmd',
@@ -49,6 +49,16 @@ export default () => {
           },
         ],
         prompts: [getVersionPrompt],
+      },
+      {
+        id: 'package',
+        name: 'Create a new version',
+        actions: [
+          {
+            type: 'cmd',
+            cmd: 'npm run build',
+          },
+        ],
       },
     ],
   });
