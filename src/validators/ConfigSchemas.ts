@@ -16,3 +16,7 @@ export const ScanvaConfigSchema = z
     rules: z.array(RuleSchema).default([]),
   })
   .strict();
+
+// Inferred types from Zod schemas
+export type Rule = z.infer<typeof RuleSchema>;
+export type ScanvaConfig = z.infer<typeof ScanvaConfigSchema>;

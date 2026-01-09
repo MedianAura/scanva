@@ -2,8 +2,7 @@ import { cosmiconfig, type CosmiconfigResult } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
 import { Logger } from '../helpers/logger.js';
 import { ConfigurationNotFoundError } from '../models/Errors.js';
-import { type ScanvaConfig } from '../models/ScanvaConfig.js';
-import { ScanvaConfigSchema } from '../validators/ConfigSchemas.js';
+import { type ScanvaConfig, ScanvaConfigSchema } from '../validators/ConfigSchemas.js';
 
 export class CommandRunner {
   public async run(): Promise<void> {
