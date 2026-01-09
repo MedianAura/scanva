@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "automaton": "./bin/run.js"
+    "scanva": "./bin/run.js"
   },
   "files": [
     "./bin",
@@ -19,8 +19,8 @@
     "check": "concatenate check",
     "check:knip": "knip",
     "fix": "concatenate fix",
-    "release": "node ./bin/run.js version",
-    "start": "node ./bin/run.js version",
+    "release": "automaton version",
+    "start": "node ./bin/run.js",
     "test:coverage": "open-cli coverage/lcov-report/index.html",
     "test:unit": "vitest --coverage.enabled --coverage.all --coverage.reporter=lcov",
     "test:unit:coverage": "vitest --reporter=default --coverage.enabled --coverage.reporter=text-summary --coverage.reporter=lcov --watch=false",
@@ -32,25 +32,21 @@
     "commander": "^14.0.2",
     "cosmiconfig": "^9.0.0",
     "cosmiconfig-typescript-loader": "^6.2.0",
-    "enquirer": "^2.4.1",
-    "execa": "^9.6.1",
-    "find-up": "^8.0.0",
     "log-update": "^7.0.2",
     "read-pkg": "^10.0.0",
-    "sprintf-js": "^1.1.3",
     "ts-custom-error": "^3.3.1",
     "update-notifier": "^7.3.1",
-    "zod": "^4.1.13"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
+    "@medianaura/automaton": "^0.2.0",
     "@medianaura/concatenate": "^0.3.2",
-    "@types/node": "^24.10.1",
-    "@types/sprintf-js": "^1.1.4",
+    "@types/node": "^24.10.4",
     "@types/update-notifier": "^6.0.8",
-    "@typescript-eslint/parser": "^8.48.0",
-    "@vitest/coverage-v8": "^4.0.14",
-    "eslint": "^9.39.1",
+    "@typescript-eslint/parser": "^8.52.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-formatter-pretty": "^7.0.0",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -64,16 +60,16 @@
     "eslint-plugin-unicorn": "62.0.0",
     "eslint-plugin-unused-imports": "^4.3.0",
     "eslint-plugin-zod": "^1.4.0",
-    "happy-dom": "^20.0.11",
-    "knip": "^5.70.2",
+    "happy-dom": "^20.1.0",
+    "knip": "^5.80.1",
     "open-cli": "^8.0.0",
-    "prettier": "^3.7.3",
+    "prettier": "^3.7.4",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
+    "typescript-eslint": "^8.52.0",
     "unplugin-auto-import": "^20.3.0",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.16"
   },
   "engines": {
     "node": ">=22.0.0"
