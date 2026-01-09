@@ -1,7 +1,7 @@
 import { readPackageSync } from 'read-pkg';
 import { program } from '@commander-js/extra-typings';
-import { CommandRunner } from './controllers/command-runner.js';
-import { handleError } from './helpers/handle-error.js';
+import { CommandRunner } from './controllers/CommandRunner.js';
+import { handleError } from './helpers/handleError.js';
 import { Logger } from './helpers/logger.js';
 
 const packageJSON = readPackageSync();
@@ -10,14 +10,8 @@ program
   .name(packageJSON.name)
   .description(packageJSON.description ?? '')
   .version(packageJSON.version)
-  .argument('<job>', 'Job to run')
-  .argument('[answer]', 'Provided answer files for the prompts')
-  .action(async (job, answer) => {
-    try {
-      await new CommandRunner().run(job, answer);
-    } catch (error: unknown) {
-      handleError(error);
-    }
+  .action(async () => {
+    await new CommandRunner().run();
   });
 
 export async function run(): Promise<void> {
