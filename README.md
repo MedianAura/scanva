@@ -242,7 +242,7 @@ The `when` function receives the same `answers` object as the action and should 
 
 Create interactive prompts using the Enquirer API. The `createPrompt` function provides a convenient wrapper for creating prompt functions, standardizing prompt creation and providing a consistent API for future extensibility. The `enquirer` object passed to the `createPrompt` callback provides access to the full Enquirer.js API.
 
-````typescript
+```typescript
 import { createPrompt } from '@medianaura/automaton';
 
 const myPrompt = createPrompt(async (enquirer) => {
@@ -273,7 +273,7 @@ const myUsernamePrompt = createPrompt(async (enquirer) => {
   ],
   prompts: [myPrompt, myUsernamePrompt]
 }
-````
+```
 
 #### Version Tools
 
@@ -306,7 +306,7 @@ export default () => {
     ],
   });
 };
-````
+```
 
 ## Commands
 
