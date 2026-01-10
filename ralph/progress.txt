@@ -71,3 +71,22 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - Wrap pattern checking in try/catch even though implementation is safe (defensive coding)
   - Log warnings for graceful failures - users need visibility into what's happening
 ---
+
+## [Sat Jan 10 13:50] - US-005
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Exported FlaggedFile and RuleResult interfaces from RuleProcessor for use in controllers
+- Updated CommandRunner to capture and process ruleResults
+- Created outputFlaggedFilesSummary() method to display violations
+- Output includes summary of total files per error level with emoji headers
+- Each flagged file shows: filename [errorLevel] - Rule: pattern, Pattern: details
+- Sorted by error level (error > warn > info) then alphabetically by filename
+- Handles all pattern types (RegExp, Array, String) when displaying
+- Files changed: src/services/RuleProcessor.ts, src/controllers/CommandRunner.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Export interfaces if they're needed by other modules (controllers, handlers, etc.)
+  - Use descriptive variable names (patternString not patternStr) - enforced by linter
+  - Avoid Array.reduce() - use loops for clarity (unicorn/no-array-reduce rule)
+  - Non-null assertion (!) requires type guards to satisfy TypeScript
+  - Logger.print() outputs on same line, Logger.println() adds newline
+---
