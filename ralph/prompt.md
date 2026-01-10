@@ -104,10 +104,8 @@ A frontend story is NOT complete until browser verification passes.
 
 ## Stop Condition
 
-When task is completed:
-
-1. Output: <promise>COMPLETE</promise>
-2. Call Bash tool with command: `exit 0` to terminate the amp process
+When task is completed output:
+<promise>COMPLETE</promise>
 
 NEVER DO MORE THAN ONE TASK PER ITERATION
 
