@@ -168,4 +168,23 @@ Thread: https://ampcode.com/threads/T-019ba94c-8c6d-7664-aec1-6c7dada48583
   - Use spread operator [...set] instead of Array.from() (ESLint unicorn/prefer-spread rule)
   - Mock entire Logger module in tests (not individual methods) for cleaner test setup
   - Logger.success() for "no violations" case; Logger.println() for regular output
-  ---
+  ---""  
+"## [Sat Jan 10 14:38] - US-005"  
+"Thread: https://ampcode.com/threads/T-019ba961-b338-7608-901d-a68727bbf329"  
+"- Removed try-catch from getDiffContent() in RuleProcessor.processRules() - let errors propagate"  
+"- Removed Logger.warn() calls for getDiffContent errors in processRules()"  
+"- Updated processRule() to remove try-catch around hasPatternInDiff() calls"  
+"- Updated findFilesWithPattern() to remove try-catch around readHeadOfFile() calls"  
+"- Now all errors from git operations, file reads, and pattern matching propagate to caller"  
+"- Created comprehensive unit tests for DiffProcessor with 10 test cases covering all pattern types"  
+"- Files changed: src/services/DiffProcessor.ts, src/services/RuleProcessor.ts, tests/unit/src/services/DiffProcessor.spec.ts (new)"  
+"- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (63 tests pass)"  
+"- Commit: feat: US-005 - Refactor DiffProcessor to Throw Errors"  
+"- **Learnings for future iterations:**"  
+"  - Error handling has shifted from defensive (catching and logging) to propagating errors up"  
+"  - Errors are now the responsibility of the caller (main.ts) to handle via centralized error handler"  
+"  - DiffProcessor now caches error-free diff content; errors thrown during getDiffContent prevent caching"  
+"  - Tests use mocking for DiffProcessor and file module to verify error propagation"  
+"  - Vitest spy/mock patterns: vi.mocked() for module functions, vi.fn() for method mocks"  
+"  - Test assertion .rejects.toThrow() verifies error propagation from async functions"  
+"---"  

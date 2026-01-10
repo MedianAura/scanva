@@ -103,4 +103,4 @@ Added npm scripts for running tests in different modes to improve developer work
 - Avoid using `git commit -i` or other interactive flags
 - If there are no changes, do not create an empty commit
 - Always verify that quality checks pass before committing
-- Never include the User Story Number since there are duplicate.
+- **IMPORTANT IMPORTANT IMPORTANT IMPORTANT : Never include the User Story Number since there are duplicate**
