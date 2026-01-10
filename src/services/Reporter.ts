@@ -1,10 +1,11 @@
+import { Level } from '../enums/Level.js';
 import { Logger } from '../helpers/logger.js';
 import { type Rule } from '../validators/ConfigSchemas.js';
 
 export interface ReportEvent {
   rule: Rule;
   file: string;
-  level: string;
+  level: Level;
 }
 
 export class Reporter {
@@ -20,7 +21,7 @@ export class Reporter {
     this.fileMatches.add(file);
   }
 
-  public onViolation(file: string, rule: Rule, level: string): void {
+  public onViolation(file: string, rule: Rule, level: Level): void {
     this.violations.push({ rule, file, level });
   }
 
@@ -35,7 +36,7 @@ export class Reporter {
     Logger.skipLine();
 
     // Group violations by error level
-    const violationsByLevel: Record<string, ReportEvent[]> = {};
+    const violationsByLevel: Record<Level, ReportEvent[]> = {} as Record<Level, ReportEvent[]>;
     for (const violation of this.violations) {
       if (!violationsByLevel[violation.level]) {
         violationsByLevel[violation.level] = [];
@@ -44,7 +45,7 @@ export class Reporter {
     }
 
     // Output violations grouped by level
-    const levelOrder = ['Error', 'Warning', 'Info'];
+    const levelOrder = [Level.Error, Level.Warning, Level.Info];
     for (const level of levelOrder) {
       const violations = violationsByLevel[level];
       if (violations) {
