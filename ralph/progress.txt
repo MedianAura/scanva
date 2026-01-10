@@ -1,0 +1,92 @@
+# Ralph Progress Log
+Started: Sat Jan 10 12:36:19 EST 2026
+---
+
+## Codebase Patterns
+- Use `spawnSync` from node:child_process for git commands (consistent pattern in helpers/git.ts)
+- Services should cache expensive operations (e.g., DiffProcessor caches diff content)
+- Handle git operations gracefully - return empty string or undefined if .git not found instead of throwing
+- Logger utility (Logger.warn, Logger.info) is standard for logging across services
+
+---
+
+## [Sat Jan 10 13:30] - US-001
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Created DiffProcessor service class in src/services/DiffProcessor.ts
+- Implemented getDiffContent() method using spawnSync to retrieve git diff HEAD
+- Implemented hasPatternInDiff() supporting string, RegExp, and array patterns
+- Cached diff content for reuse across multiple pattern checks
+- Graceful error handling - returns empty string if .git missing or git fails
+- Files changed: src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - The codebase follows a pattern where git operations use spawnSync (not promises)
+  - Services are placed in src/services/ directory alongside RuleProcessor
+  - Logger is imported from helpers/logger.js for consistent logging
+  - Error handling returns gracefully rather than throwing - follow this pattern for reliability
+---
+
+## [Sat Jan 10 13:35] - US-002
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added FlaggedFile interface to RuleProcessor with properties: file, rule, errorLevel
+- Extended RuleResult interface to include flaggedFiles array
+- Updated processRule() to initialize flaggedFiles as empty array
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Interfaces are defined locally in service files (not exported separately)
+  - FlaggedFile stores references to the Rule object itself (not just name/id)
+  - Error level comes from rule.level (already part of Rule interface)
+---
+
+## [Sat Jan 10 13:40] - US-003
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Imported DiffProcessor into RuleProcessor
+- Instantiated DiffProcessor as class property
+- Cache diff content once in processRules() using cachedDiffContent
+- Updated processRule() to check if matched files' patterns exist in cached diff
+- Create FlaggedFile entries for files with pattern matches in diff
+- Log violations with file, rule pattern, and error level
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Cache diff content at the processRules level (not in each rule check) for efficiency
+  - Use rule.find (if present) for pattern checking, fallback to rule.pattern
+  - Check if pattern exists IN the DIFF content, not just that the file exists
+  - flaggedFiles only populated if diff content retrieved successfully
+---
+
+## [Sat Jan 10 13:45] - US-004
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added graceful handling for missing .git directory - logs warning and continues
+- Wrapped pattern checking in try/catch to handle errors without crashing
+- Check for empty diff content (indicates git unavailable) and skip validation
+- All pattern types handled: RegExp (test), Array (some), String (includes)
+- Log warnings when diff unavailable or pattern checking fails
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Empty string from getDiffContent means no .git or git failed (intentional design)
+  - Always check for empty diff before processing to avoid unnecessary work
+  - Wrap pattern checking in try/catch even though implementation is safe (defensive coding)
+  - Log warnings for graceful failures - users need visibility into what's happening
+---
+
+## [Sat Jan 10 13:50] - US-005
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Exported FlaggedFile and RuleResult interfaces from RuleProcessor for use in controllers
+- Updated CommandRunner to capture and process ruleResults
+- Created outputFlaggedFilesSummary() method to display violations
+- Output includes summary of total files per error level with emoji headers
+- Each flagged file shows: filename [errorLevel] - Rule: pattern, Pattern: details
+- Sorted by error level (error > warn > info) then alphabetically by filename
+- Handles all pattern types (RegExp, Array, String) when displaying
+- Files changed: src/services/RuleProcessor.ts, src/controllers/CommandRunner.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Export interfaces if they're needed by other modules (controllers, handlers, etc.)
+  - Use descriptive variable names (patternString not patternStr) - enforced by linter
+  - Avoid Array.reduce() - use loops for clarity (unicorn/no-array-reduce rule)
+  - Non-null assertion (!) requires type guards to satisfy TypeScript
+  - Logger.print() outputs on same line, Logger.println() adds newline
+---

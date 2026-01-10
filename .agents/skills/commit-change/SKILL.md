@@ -1,6 +1,17 @@
+---
+name: commit-change
+description: Creates a git commit following the project's commit message format specified in INSTRUCTIONS.md.
+---
+
 # Commit Change
 
-Create a git commit following the project's commit message format specified in INSTRUCTIONS.md.
+Create a git commit following the project's commit message format.
+
+## When to Use
+
+- When asked to commit changes
+- After completing a feature or fix
+- When the user wants to save their work to git
 
 ## Instructions
 

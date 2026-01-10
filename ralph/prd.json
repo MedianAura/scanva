@@ -1,0 +1,141 @@
+{
+  "project": "Scanva",
+  "branchName": "ralph/service-architecture-refactor",
+  "description": "Service Architecture Refactor - Centralize Git Logic, Pattern Matching, and Reporting with Vitest Unit Tests",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Consolidate Git Operations into Helper",
+      "description": "As a developer, I need all git command invocations in one place so changes to git handling are centralized and consistent.",
+      "acceptanceCriteria": [
+        "Add getDiffContent(commitRef: string = 'HEAD'): string to src/helpers/git.ts",
+        "Throws error if git command fails or .git directory not found",
+        "Returns stdout as string (not empty string on error)",
+        "Update DiffProcessor to use getDiffContent() from git helper",
+        "Remove spawnSync import from DiffProcessor",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Set Up Vitest Infrastructure",
+      "description": "As a developer, I need a testing framework configured so I can write unit tests for utilities and services.",
+      "acceptanceCriteria": [
+        "Install Vitest as dev dependency",
+        "Create vitest.config.ts at project root",
+        "Add npm scripts: npm run test:unit (run vitest)",
+        "Configure Vitest to use TypeScript",
+        "Create src/**/*.test.ts test file structure",
+        "Verify scripts are added to package.json and sorted",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Extract Reusable Pattern Matching Utility",
+      "description": "As a developer, I need a single pattern matching function so DiffProcessor and RuleProcessor don't duplicate the same logic.",
+      "acceptanceCriteria": [
+        "Create src/helpers/patternMatcher.ts with function hasPatternMatch(pattern: string | RegExp | string[], content: string): boolean",
+        "Handles RegExp, string[], and string patterns identically to current implementations",
+        "Update RuleProcessor.hasPatternMatch() to use utility",
+        "Update DiffProcessor.hasPatternInDiff() to use utility",
+        "Remove duplicate pattern matching code from both services",
+        "Write comprehensive unit tests for hasPatternMatch() covering all pattern types",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Create Reporter Service",
+      "description": "As a developer, I need a Reporter Service to handle all user-facing output so services stay silent and focused on business logic.",
+      "acceptanceCriteria": [
+        "Create src/services/Reporter.ts with class Reporter",
+        "Implement methods: onRuleProcessed(rule: Rule): void, onFileMatched(file: string): void, onViolation(file: string, rule: Rule, level: string): void",
+        "Implement report(): void method that outputs all collected data to user",
+        "Reporter collects events during processing, outputs batch at end",
+        "Output shows: total violations, violations by error level, list of flagged files",
+        "Write unit tests for Reporter (mock Logger, verify output format)",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Refactor DiffProcessor to Throw Errors",
+      "description": "As a developer, I need DiffProcessor to throw errors instead of returning empty strings so error handling is centralized at the entry point.",
+      "acceptanceCriteria": [
+        "Remove try-catch from getDiffContent() - let errors propagate",
+        "Remove Logger.warn() calls from DiffProcessor",
+        "getDiffContent() throws descriptive Error if git fails",
+        "Update RuleProcessor to handle getDiffContent() errors appropriately",
+        "Write unit tests: verify errors are thrown, not silently returned",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Refactor RuleProcessor Error Handling",
+      "description": "As a developer, I need RuleProcessor to throw errors instead of logging warnings so failures propagate to main.ts for centralized handling.",
+      "acceptanceCriteria": [
+        "Remove try-catch in findFilesWithPattern() - let file read errors propagate",
+        "Remove try-catch in processRule() - let pattern match errors propagate",
+        "Remove Logger.warn() calls from error handlers",
+        "Throw descriptive Error if file cannot be read",
+        "Throw descriptive Error if pattern matching fails",
+        "Write unit tests: verify errors are thrown in expected scenarios",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Integrate Reporter into RuleProcessor",
+      "description": "As a developer, I need RuleProcessor to call Reporter methods so all user output is centralized.",
+      "acceptanceCriteria": [
+        "Inject Reporter into RuleProcessor constructor",
+        "Call reporter.onRuleProcessed(rule) after processing each rule",
+        "Call reporter.onFileMatched(file) for each matched file",
+        "Call reporter.onViolation(file, rule, level) for each flagged violation",
+        "Remove Logger.info() calls that report progress (let Reporter handle it)",
+        "Write unit tests: verify reporter methods are called correctly",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Update CommandRunner to Use Reporter",
+      "description": "As a developer, I need CommandRunner to instantiate and use Reporter so all output flows through it.",
+      "acceptanceCriteria": [
+        "Create Reporter instance in CommandRunner",
+        "Pass Reporter to RuleProcessor constructor",
+        "Call reporter.report() after all rules are processed",
+        "Update main.ts to ensure handleError() catches all errors from CommandRunner",
+        "Test with simulated errors (missing .git, invalid pattern, file read failure)",
+        "Verify exit code 1 on any error, user-friendly error messages",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
