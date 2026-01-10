@@ -8,6 +8,7 @@ const RuleSchema = z
     pattern: z.string(),
     level: z.enum(Level),
     find: z.union([z.instanceof(RegExp), z.string(), z.array(z.string())]).optional(),
+    head: z.number().default(10).optional(),
   })
   .strict();
 

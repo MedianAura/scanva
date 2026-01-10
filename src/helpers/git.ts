@@ -1,21 +1,32 @@
 import { spawnSync } from 'node:child_process';
+import path from 'node:path';
 
-export function getLatestTag(): string | undefined {
+export function getGitRoot(): string {
   const command = 'git';
+  const commandSwitch = ['rev-parse', '--show-toplevel'];
+  const gitRootIO = spawnSync(command, commandSwitch);
 
-  let commandSwitch = ['fetch', '--all', '--tags'];
-  spawnSync(command, commandSwitch);
-
-  commandSwitch = ['rev-list', 'HEAD', '--exclude=alpha-*', '--tags', '--max-count=1'];
-  const commitIO = spawnSync(command, commandSwitch);
-  const commit = commitIO.stdout.toString().replace('\n', '');
-
-  commandSwitch = ['describe', '--tags', commit];
-  const tag = spawnSync(command, commandSwitch);
-
-  if (tag.stdout.toString()) {
-    return tag.stdout.toString().toLowerCase().replace(/\n/, '').replace('v', '').replace('rel-', '');
+  if (gitRootIO.stdout.toString()) {
+    return gitRootIO.stdout.toString().trim();
   }
 
-  return undefined;
+  throw new Error('Could not determine git root directory');
+}
+
+export function getFilesFromCommit(commitHash: string = 'HEAD'): string[] {
+  const command = 'git';
+
+  const commandSwitch = ['diff-tree', '--no-commit-id', '--name-only', '-r', commitHash];
+  const filesIO = spawnSync(command, commandSwitch);
+
+  if (filesIO.stdout.toString()) {
+    const gitRoot = getGitRoot();
+    return filesIO.stdout
+      .toString()
+      .split('\n')
+      .filter((file) => file.trim() !== '')
+      .map((file) => path.resolve(gitRoot, file.trim()));
+  }
+
+  return [];
 }

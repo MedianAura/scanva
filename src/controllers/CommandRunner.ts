@@ -1,11 +1,13 @@
 import { cosmiconfig, type CosmiconfigResult } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
+import { getFilesFromCommit } from '../helpers/git.js';
 import { Logger } from '../helpers/logger.js';
 import { ConfigurationNotFoundError } from '../models/Errors.js';
+import { RuleProcessor } from '../services/RuleProcessor.js';
 import { type ScanvaConfig, ScanvaConfigSchema } from '../validators/ConfigSchemas.js';
 
 export class CommandRunner {
-  public async run(): Promise<void> {
+  public async run(commitHash: string): Promise<void> {
     const result = await this.getConfig();
 
     if (result === null) {
@@ -13,7 +15,10 @@ export class CommandRunner {
     }
 
     const config = await this.parseConfig(result.config);
-    console.log(config);
+    const files = getFilesFromCommit(commitHash);
+
+    const ruleProcessor = new RuleProcessor();
+    await ruleProcessor.processRules(config, files);
 
     Logger.success('Job executed successfully');
   }
