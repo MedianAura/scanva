@@ -1,3 +1,27 @@
 # Ralph Progress Log
 Started: Sat Jan 10 12:36:19 EST 2026
 ---
+
+## Codebase Patterns
+- Use `spawnSync` from node:child_process for git commands (consistent pattern in helpers/git.ts)
+- Services should cache expensive operations (e.g., DiffProcessor caches diff content)
+- Handle git operations gracefully - return empty string or undefined if .git not found instead of throwing
+- Logger utility (Logger.warn, Logger.info) is standard for logging across services
+
+---
+
+## [Sat Jan 10 13:30] - US-001
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Created DiffProcessor service class in src/services/DiffProcessor.ts
+- Implemented getDiffContent() method using spawnSync to retrieve git diff HEAD
+- Implemented hasPatternInDiff() supporting string, RegExp, and array patterns
+- Cached diff content for reuse across multiple pattern checks
+- Graceful error handling - returns empty string if .git missing or git fails
+- Files changed: src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - The codebase follows a pattern where git operations use spawnSync (not promises)
+  - Services are placed in src/services/ directory alongside RuleProcessor
+  - Logger is imported from helpers/logger.js for consistent logging
+  - Error handling returns gracefully rather than throwing - follow this pattern for reliability
+---

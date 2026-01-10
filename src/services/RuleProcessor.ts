@@ -4,10 +4,17 @@ import { readHeadOfFile } from '../helpers/file.js';
 import { Logger } from '../helpers/logger.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
 
+interface FlaggedFile {
+  file: string;
+  rule: Rule;
+  errorLevel: string;
+}
+
 interface RuleResult {
   rule: Rule;
   matchedFiles: string[];
   filesWithMatches: string[];
+  flaggedFiles: FlaggedFile[];
 }
 
 export class RuleProcessor {
@@ -31,6 +38,7 @@ export class RuleProcessor {
       rule,
       matchedFiles,
       filesWithMatches,
+      flaggedFiles: [],
     };
   }
 
