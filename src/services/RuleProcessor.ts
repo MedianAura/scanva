@@ -25,7 +25,12 @@ export class RuleProcessor {
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
-    this.cachedDiffContent = this.diffProcessor.getDiffContent();
+    try {
+      this.cachedDiffContent = this.diffProcessor.getDiffContent();
+    } catch (error) {
+      Logger.warn(`Failed to retrieve git diff: ${error instanceof Error ? error.message : String(error)}`);
+      this.cachedDiffContent = undefined;
+    }
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
@@ -42,10 +47,7 @@ export class RuleProcessor {
     const flaggedFiles: FlaggedFile[] = [];
 
     // Check if matched files have patterns in the diff
-    if (this.cachedDiffContent === '') {
-      // If diff content is empty, skip validation (no .git directory or git failed)
-      Logger.warn('Skipping diff validation - git diff unavailable, continuing with normal processing');
-    } else if (this.cachedDiffContent !== undefined) {
+    if (this.cachedDiffContent !== undefined) {
       for (const file of filesWithMatches) {
         try {
           if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {

@@ -90,3 +90,21 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - Non-null assertion (!) requires type guards to satisfy TypeScript
   - Logger.print() outputs on same line, Logger.println() adds newline
 ---
+
+## [Sat Jan 10 18:50] - US-001
+Thread: https://ampcode.com/threads/T-019ba93e-d58e-77bb-b969-3e08dcbca6e6
+- Added getDiffContent(commitReference: string = 'HEAD'): string to src/helpers/git.ts
+- Implements proper error handling: throws Error if git fails or .git not found
+- Returns stdout as string (no empty string fallback - errors propagate)
+- Updated DiffProcessor to import and use getDiffContent() from git helper
+- Removed spawnSync import from DiffProcessor (now only imports getDiffContent)
+- Renamed parameter from commitRef to commitReference to fix linting (unicorn/prevent-abbreviations rule)
+- Files changed: src/helpers/git.ts, src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓ (ESLint, Prettier, TSC)
+- Commit: feat: US-001 - Consolidate Git Operations into Helper
+- **Learnings for future iterations:**
+  - Parameter names must be descriptive (commitRef → commitReference) per unicorn/prevent-abbreviations rule
+  - Error handling in git operations: throw errors instead of returning empty strings for centralized handling
+  - The codebase now expects errors to propagate up to the caller for centralized error handling
+  - getDiffContent is now the single source of truth for all git diff operations
+---

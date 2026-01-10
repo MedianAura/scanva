@@ -59,12 +59,12 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   echo "  Ralph Iteration $i of $MAX_ITERATIONS"
   echo "═══════════════════════════════════════════════════════"
 
-  # Run amp with the ralph prompt and display output
-  cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all -m rush 2>&1 | tee "$SCRIPT_DIR/ralph_out.txt"
-  OUTPUT=$(cat "$SCRIPT_DIR/ralph_out.txt")
+  # Run amp with the ralph prompt
+  amp --dangerously-allow-all -m rush < "$SCRIPT_DIR/prompt.md"
+  AMPSTATUS=$?
 
-  # Check for completion signal
-  if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+  # If amp completed successfully, check progress file for all stories passed
+  if [ $AMPSTATUS -eq 0 ]; then
     echo ""
     echo "Ralph completed all tasks!"
     echo "Completed at iteration $i of $MAX_ITERATIONS"
