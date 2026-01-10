@@ -1,4 +1,5 @@
 import { getDiffContent } from '../helpers/git.js';
+import { hasPatternMatch } from '../helpers/patternMatcher.js';
 
 export class DiffProcessor {
   private diffContent: string | undefined;
@@ -26,18 +27,6 @@ export class DiffProcessor {
    * @returns true if pattern is found in diff, false otherwise
    */
   public hasPatternInDiff(pattern: string | RegExp | string[], diffContent: string): boolean {
-    if (!diffContent) {
-      return false;
-    }
-
-    if (pattern instanceof RegExp) {
-      return pattern.test(diffContent);
-    }
-
-    if (Array.isArray(pattern)) {
-      return pattern.some((p) => diffContent.includes(p));
-    }
-
-    return diffContent.includes(pattern as string);
+    return hasPatternMatch(pattern, diffContent);
   }
 }

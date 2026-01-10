@@ -2,6 +2,7 @@ import multimatch from 'multimatch';
 import { existsSync } from 'node:fs';
 import { readHeadOfFile } from '../helpers/file.js';
 import { Logger } from '../helpers/logger.js';
+import { hasPatternMatch } from '../helpers/patternMatcher.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
 import { DiffProcessor } from './DiffProcessor.js';
 
@@ -90,7 +91,7 @@ export class RuleProcessor {
       try {
         const headContent = await readHeadOfFile(file, rule.head);
 
-        if (this.hasPatternMatch(rule, headContent)) {
+        if (hasPatternMatch(rule.find, headContent)) {
           filesWithMatches.push(file);
         }
       } catch {
@@ -99,18 +100,5 @@ export class RuleProcessor {
     }
 
     return filesWithMatches;
-  }
-
-  private hasPatternMatch(rule: Rule, content: string): boolean {
-    // This method assumes rule.find exists (caller should check)
-    if (rule.find instanceof RegExp) {
-      return rule.find.test(content);
-    }
-
-    if (Array.isArray(rule.find)) {
-      return rule.find.some((pattern) => content.includes(pattern));
-    }
-
-    return content.includes(rule.find as string);
   }
 }
