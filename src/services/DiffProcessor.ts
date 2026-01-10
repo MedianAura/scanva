@@ -1,37 +1,22 @@
-import { spawnSync } from 'node:child_process';
-import { Logger } from '../helpers/logger.js';
+import { getDiffContent } from '../helpers/git.js';
 
 export class DiffProcessor {
   private diffContent: string | undefined;
 
   /**
-   * Retrieves git diff content using spawnSync.
+   * Retrieves git diff content from the git helper.
    * Caches the result so subsequent calls return the cached content.
-   * @returns git diff as string, or empty string if no .git directory or on error
+   * Throws error if git command fails or .git directory not found.
+   * @param commitReference - git reference to diff against (default: 'HEAD')
+   * @returns git diff as string
    */
-  public getDiffContent(): string {
+  public getDiffContent(commitReference: string = 'HEAD'): string {
     if (this.diffContent !== undefined) {
       return this.diffContent;
     }
 
-    try {
-      const command = 'git';
-      const commandSwitch = ['diff', 'HEAD'];
-      const diffIO = spawnSync(command, commandSwitch);
-
-      if (diffIO.error) {
-        Logger.warn('Failed to retrieve git diff: .git directory not found or git not available');
-        this.diffContent = '';
-        return '';
-      }
-
-      this.diffContent = diffIO.stdout.toString();
-      return this.diffContent;
-    } catch (error) {
-      Logger.warn(`Error retrieving git diff: ${error instanceof Error ? error.message : String(error)}`);
-      this.diffContent = '';
-      return '';
-    }
+    this.diffContent = getDiffContent(commitReference);
+    return this.diffContent;
   }
 
   /**
