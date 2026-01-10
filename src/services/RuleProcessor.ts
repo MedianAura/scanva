@@ -5,13 +5,13 @@ import { Logger } from '../helpers/logger.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
 import { DiffProcessor } from './DiffProcessor.js';
 
-interface FlaggedFile {
+export interface FlaggedFile {
   file: string;
   rule: Rule;
   errorLevel: string;
 }
 
-interface RuleResult {
+export interface RuleResult {
   rule: Rule;
   matchedFiles: string[];
   filesWithMatches: string[];

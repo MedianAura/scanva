@@ -55,3 +55,19 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - Check if pattern exists IN the DIFF content, not just that the file exists
   - flaggedFiles only populated if diff content retrieved successfully
 ---
+
+## [Sat Jan 10 13:45] - US-004
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added graceful handling for missing .git directory - logs warning and continues
+- Wrapped pattern checking in try/catch to handle errors without crashing
+- Check for empty diff content (indicates git unavailable) and skip validation
+- All pattern types handled: RegExp (test), Array (some), String (includes)
+- Log warnings when diff unavailable or pattern checking fails
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Empty string from getDiffContent means no .git or git failed (intentional design)
+  - Always check for empty diff before processing to avoid unnecessary work
+  - Wrap pattern checking in try/catch even though implementation is safe (defensive coding)
+  - Log warnings for graceful failures - users need visibility into what's happening
+---
