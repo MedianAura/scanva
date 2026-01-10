@@ -42,15 +42,22 @@ export class RuleProcessor {
     const flaggedFiles: FlaggedFile[] = [];
 
     // Check if matched files have patterns in the diff
-    if (this.cachedDiffContent !== undefined) {
+    if (this.cachedDiffContent === '') {
+      // If diff content is empty, skip validation (no .git directory or git failed)
+      Logger.warn('Skipping diff validation - git diff unavailable, continuing with normal processing');
+    } else if (this.cachedDiffContent !== undefined) {
       for (const file of filesWithMatches) {
-        if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
-          flaggedFiles.push({
-            file,
-            rule,
-            errorLevel: rule.level,
-          });
-          Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
+        try {
+          if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
+            flaggedFiles.push({
+              file,
+              rule,
+              errorLevel: rule.level,
+            });
+            Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
+          }
+        } catch (error) {
+          Logger.warn(`Error checking pattern for file ${file}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }

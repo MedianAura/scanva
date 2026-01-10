@@ -38,3 +38,20 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - FlaggedFile stores references to the Rule object itself (not just name/id)
   - Error level comes from rule.level (already part of Rule interface)
 ---
+
+## [Sat Jan 10 13:40] - US-003
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Imported DiffProcessor into RuleProcessor
+- Instantiated DiffProcessor as class property
+- Cache diff content once in processRules() using cachedDiffContent
+- Updated processRule() to check if matched files' patterns exist in cached diff
+- Create FlaggedFile entries for files with pattern matches in diff
+- Log violations with file, rule pattern, and error level
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Cache diff content at the processRules level (not in each rule check) for efficiency
+  - Use rule.find (if present) for pattern checking, fallback to rule.pattern
+  - Check if pattern exists IN the DIFF content, not just that the file exists
+  - flaggedFiles only populated if diff content retrieved successfully
+---
