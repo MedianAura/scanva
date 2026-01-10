@@ -2,6 +2,7 @@ import multimatch from 'multimatch';
 import { existsSync } from 'node:fs';
 import { readHeadOfFile } from '../helpers/file.js';
 import { Logger } from '../helpers/logger.js';
+import { hasPatternMatch } from '../helpers/patternMatcher.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
 import { DiffProcessor } from './DiffProcessor.js';
 
@@ -25,7 +26,12 @@ export class RuleProcessor {
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
-    this.cachedDiffContent = this.diffProcessor.getDiffContent();
+    try {
+      this.cachedDiffContent = this.diffProcessor.getDiffContent();
+    } catch (error) {
+      Logger.warn(`Failed to retrieve git diff: ${error instanceof Error ? error.message : String(error)}`);
+      this.cachedDiffContent = undefined;
+    }
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
@@ -42,10 +48,7 @@ export class RuleProcessor {
     const flaggedFiles: FlaggedFile[] = [];
 
     // Check if matched files have patterns in the diff
-    if (this.cachedDiffContent === '') {
-      // If diff content is empty, skip validation (no .git directory or git failed)
-      Logger.warn('Skipping diff validation - git diff unavailable, continuing with normal processing');
-    } else if (this.cachedDiffContent !== undefined) {
+    if (this.cachedDiffContent !== undefined) {
       for (const file of filesWithMatches) {
         try {
           if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
@@ -88,7 +91,7 @@ export class RuleProcessor {
       try {
         const headContent = await readHeadOfFile(file, rule.head);
 
-        if (this.hasPatternMatch(rule, headContent)) {
+        if (hasPatternMatch(rule.find, headContent)) {
           filesWithMatches.push(file);
         }
       } catch {
@@ -97,18 +100,5 @@ export class RuleProcessor {
     }
 
     return filesWithMatches;
-  }
-
-  private hasPatternMatch(rule: Rule, content: string): boolean {
-    // This method assumes rule.find exists (caller should check)
-    if (rule.find instanceof RegExp) {
-      return rule.find.test(content);
-    }
-
-    if (Array.isArray(rule.find)) {
-      return rule.find.some((pattern) => content.includes(pattern));
-    }
-
-    return content.includes(rule.find as string);
   }
 }

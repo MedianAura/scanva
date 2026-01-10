@@ -90,3 +90,82 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - Non-null assertion (!) requires type guards to satisfy TypeScript
   - Logger.print() outputs on same line, Logger.println() adds newline
 ---
+
+## [Sat Jan 10 18:50] - US-001
+Thread: https://ampcode.com/threads/T-019ba93e-d58e-77bb-b969-3e08dcbca6e6
+- Added getDiffContent(commitReference: string = 'HEAD'): string to src/helpers/git.ts
+- Implements proper error handling: throws Error if git fails or .git not found
+- Returns stdout as string (no empty string fallback - errors propagate)
+- Updated DiffProcessor to import and use getDiffContent() from git helper
+- Removed spawnSync import from DiffProcessor (now only imports getDiffContent)
+- Renamed parameter from commitRef to commitReference to fix linting (unicorn/prevent-abbreviations rule)
+- Files changed: src/helpers/git.ts, src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓ (ESLint, Prettier, TSC)
+- Commit: feat: US-001 - Consolidate Git Operations into Helper
+- **Learnings for future iterations:**
+  - Parameter names must be descriptive (commitRef → commitReference) per unicorn/prevent-abbreviations rule
+  - Error handling in git operations: throw errors instead of returning empty strings for centralized handling
+  - The codebase now expects errors to propagate up to the caller for centralized error handling
+  - getDiffContent is now the single source of truth for all git diff operations
+---
+
+## [Sat Jan 10 13:59] - US-002
+Thread: https://ampcode.com/threads/T-019ba945-80c6-7698-a4f5-71acebf40874
+- Vitest infrastructure already fully configured (vitest ^4.0.16 installed as dev dependency)
+- vitest.config.mjs exists with proper TypeScript configuration and test patterns
+- npm scripts test:unit and test:unit:coverage already configured and functional
+- Created example test file tests/unit/src/helpers/git.spec.ts with TypeScript and vitest globals
+- Verified test infrastructure works: tests pass, coverage reports generate, all quality checks pass
+- Files changed: tests/unit/src/helpers/git.spec.ts, ralph/prd.json
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓
+- Commit: feat: US-002 - Set Up Vitest Infrastructure
+- **Learnings for future iterations:**
+  - Vitest test files use .spec.ts naming convention (not .test.ts) per vitest.config.mjs
+  - Tests are located in tests/unit/src/ mirroring the src/ directory structure
+  - Vitest globals are auto-imported (describe, it, expect, vi, beforeEach, etc.) via unplugin-auto-import
+  - Test files automatically get full TypeScript support and inference
+  - npm run test:unit runs with coverage enabled by default in this project
+---
+
+## [Sat Jan 10 19:07] - US-003
+Thread: https://ampcode.com/threads/T-019ba94c-8c6d-7664-aec1-6c7dada48583
+- Created src/helpers/patternMatcher.ts with hasPatternMatch(pattern, content): boolean
+- Function handles RegExp, string[], and string patterns uniformly
+- Updated DiffProcessor.hasPatternInDiff() to use the utility function
+- Updated RuleProcessor.findFilesWithPattern() to use the utility function
+- Removed private hasPatternMatch() method from RuleProcessor
+- Removed duplicate pattern matching code from both services
+- Created comprehensive unit tests in tests/unit/src/helpers/patternMatcher.spec.ts (28 tests)
+- Tests cover: string patterns, RegExp patterns, array patterns, edge cases, integration scenarios
+- Files changed: src/helpers/patternMatcher.ts (new), src/services/DiffProcessor.ts, src/services/RuleProcessor.ts, tests/unit/src/helpers/patternMatcher.spec.ts (new), ralph/prd.json
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (31 tests pass)
+- Commit: feat: US-003 - Extract Reusable Pattern Matching Utility
+- **Learnings for future iterations:**
+  - Pattern matching logic should be centralized in helpers/patternMatcher.ts for reuse
+  - The hasPatternMatch function handles empty content by returning false (defensive)
+  - Array patterns use Array.some() for short-circuit evaluation (efficient)
+  - Tests should avoid RegExp object comparisons (use === instead of pattern === /regex/)
+  - All test files should use .spec.ts naming convention in tests/unit/ directory
+  ---
+
+  ## [Sat Jan 10 14:17] - US-004
+  Thread: https://ampcode.com/threads/T-019ba952-772d-750a-826e-a9ad4cd1c1b2
+  - Created src/services/Reporter.ts with Reporter class for batched output collection
+  - Implemented methods: onRuleProcessed(rule), onFileMatched(file), onViolation(file, rule, level)
+  - Implemented report(): void that outputs collected violations by error level with flagged files list
+  - Reporter uses Set for files (prevents duplicates) and array for violations (preserves order)
+  - Output format: total violations count, grouped by level (Error > Warning > Info), sorted files
+  - Created comprehensive test suite with 12 tests covering all methods and scenarios
+  - Tests mock Logger, verify method calls, and validate report output structure
+  - Files changed: src/services/Reporter.ts (new), tests/unit/src/services/Reporter.spec.ts (new), ralph/prd.json
+  - Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (43 tests total)
+  - Commit: feat: US-004 - Create Reporter Service
+  - **Learnings for future iterations:**
+  - Use Level enum (Level.Error, Level.Warning, Level.Info) - not string literals
+  - Set is ideal for deduplicating files; array for violations to maintain order
+  - Report should group by error level in consistent order: Error > Warning > Info
+  - Use toSorted() instead of sort() (ESLint unicorn/no-array-sort rule)
+  - Use spread operator [...set] instead of Array.from() (ESLint unicorn/prefer-spread rule)
+  - Mock entire Logger module in tests (not individual methods) for cleaner test setup
+  - Logger.success() for "no violations" case; Logger.println() for regular output
+  ---

@@ -104,7 +104,7 @@ A frontend story is NOT complete until browser verification passes.
 
 ## Stop Condition
 
-When task is completed output.
+When task is completed output:
 <promise>COMPLETE</promise>
 
 NEVER DO MORE THAN ONE TASK PER ITERATION

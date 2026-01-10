@@ -30,3 +30,19 @@ export function getFilesFromCommit(commitHash: string = 'HEAD'): string[] {
 
   return [];
 }
+
+export function getDiffContent(commitReference: string = 'HEAD'): string {
+  const command = 'git';
+  const commandSwitch = ['diff', commitReference];
+  const diffIO = spawnSync(command, commandSwitch);
+
+  if (diffIO.error) {
+    throw new Error('Failed to retrieve git diff: .git directory not found or git not available');
+  }
+
+  if (diffIO.status !== 0) {
+    throw new Error(`Git command failed with status ${diffIO.status}`);
+  }
+
+  return diffIO.stdout.toString();
+}

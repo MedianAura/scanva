@@ -59,9 +59,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   echo "  Ralph Iteration $i of $MAX_ITERATIONS"
   echo "═══════════════════════════════════════════════════════"
 
-  # Run amp with the ralph prompt and display output
-  cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all -m rush 2>&1 | tee "$SCRIPT_DIR/ralph_out.txt"
-  OUTPUT=$(cat "$SCRIPT_DIR/ralph_out.txt")
+  # Run amp with the ralph prompt
+  OUTPUT=$(cat "$SCRIPT_DIR/ralph/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
 
   # Check for completion signal
   if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
