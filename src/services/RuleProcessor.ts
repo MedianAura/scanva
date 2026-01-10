@@ -26,12 +26,7 @@ export class RuleProcessor {
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
-    try {
-      this.cachedDiffContent = this.diffProcessor.getDiffContent();
-    } catch (error) {
-      Logger.warn(`Failed to retrieve git diff: ${error instanceof Error ? error.message : String(error)}`);
-      this.cachedDiffContent = undefined;
-    }
+    this.cachedDiffContent = this.diffProcessor.getDiffContent();
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
@@ -48,20 +43,14 @@ export class RuleProcessor {
     const flaggedFiles: FlaggedFile[] = [];
 
     // Check if matched files have patterns in the diff
-    if (this.cachedDiffContent !== undefined) {
-      for (const file of filesWithMatches) {
-        try {
-          if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
-            flaggedFiles.push({
-              file,
-              rule,
-              errorLevel: rule.level,
-            });
-            Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
-          }
-        } catch (error) {
-          Logger.warn(`Error checking pattern for file ${file}: ${error instanceof Error ? error.message : String(error)}`);
-        }
+    for (const file of filesWithMatches) {
+      if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent!)) {
+        flaggedFiles.push({
+          file,
+          rule,
+          errorLevel: rule.level,
+        });
+        Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
       }
     }
 
@@ -88,14 +77,10 @@ export class RuleProcessor {
     const filesWithMatches: string[] = [];
 
     for (const file of files) {
-      try {
-        const headContent = await readHeadOfFile(file, rule.head);
+      const headContent = await readHeadOfFile(file, rule.head);
 
-        if (hasPatternMatch(rule.find, headContent)) {
-          filesWithMatches.push(file);
-        }
-      } catch {
-        Logger.warn(`Could not read file: ${file}`);
+      if (hasPatternMatch(rule.find, headContent)) {
+        filesWithMatches.push(file);
       }
     }
 

@@ -10,6 +10,7 @@ export class DiffProcessor {
    * Throws error if git command fails or .git directory not found.
    * @param commitReference - git reference to diff against (default: 'HEAD')
    * @returns git diff as string
+   * @throws Error if git command fails or .git directory not found
    */
   public getDiffContent(commitReference: string = 'HEAD'): string {
     if (this.diffContent !== undefined) {
