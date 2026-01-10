@@ -25,3 +25,16 @@ Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
   - Logger is imported from helpers/logger.js for consistent logging
   - Error handling returns gracefully rather than throwing - follow this pattern for reliability
 ---
+
+## [Sat Jan 10 13:35] - US-002
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added FlaggedFile interface to RuleProcessor with properties: file, rule, errorLevel
+- Extended RuleResult interface to include flaggedFiles array
+- Updated processRule() to initialize flaggedFiles as empty array
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Interfaces are defined locally in service files (not exported separately)
+  - FlaggedFile stores references to the Rule object itself (not just name/id)
+  - Error level comes from rule.level (already part of Rule interface)
+---

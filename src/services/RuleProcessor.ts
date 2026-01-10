@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { readHeadOfFile } from '../helpers/file.js';
 import { Logger } from '../helpers/logger.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
+import { DiffProcessor } from './DiffProcessor.js';
 
 interface FlaggedFile {
   file: string;
@@ -18,8 +19,13 @@ interface RuleResult {
 }
 
 export class RuleProcessor {
+  private diffProcessor = new DiffProcessor();
+  private cachedDiffContent: string | undefined;
+
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
+    // Cache diff content once for all rules
+    this.cachedDiffContent = this.diffProcessor.getDiffContent();
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
@@ -33,12 +39,27 @@ export class RuleProcessor {
   private async processRule(rule: Rule, files: string[]): Promise<RuleResult> {
     const matchedFiles = this.getMatchingFiles(rule, files);
     const filesWithMatches = await this.findFilesWithPattern(rule, matchedFiles);
+    const flaggedFiles: FlaggedFile[] = [];
+
+    // Check if matched files have patterns in the diff
+    if (this.cachedDiffContent !== undefined) {
+      for (const file of filesWithMatches) {
+        if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
+          flaggedFiles.push({
+            file,
+            rule,
+            errorLevel: rule.level,
+          });
+          Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
+        }
+      }
+    }
 
     return {
       rule,
       matchedFiles,
       filesWithMatches,
-      flaggedFiles: [],
+      flaggedFiles,
     };
   }
 
