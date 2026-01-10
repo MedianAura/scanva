@@ -1,82 +1,140 @@
 {
   "project": "Scanva",
-  "branchName": "ralph/git-diff-rule-validation",
-  "description": "Git Diff Rule Validation - Check rule pattern matches against git diff changes and track violations",
+  "branchName": "ralph/service-architecture-refactor",
+  "description": "Service Architecture Refactor - Centralize Git Logic, Pattern Matching, and Reporting with Vitest Unit Tests",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create DiffProcessor service",
-      "description": "As a developer, I need a service to analyze git diffs and check for pattern matches so it can be integrated into the rule processing pipeline.",
+      "title": "Consolidate Git Operations into Helper",
+      "description": "As a developer, I need all git command invocations in one place so changes to git handling are centralized and consistent.",
       "acceptanceCriteria": [
-        "Create src/services/DiffProcessor.ts with class DiffProcessor",
-        "Implement method getDiffContent(): string to retrieve git diff using spawnSync (consistent with git.ts pattern)",
-        "Implement method hasPatternInDiff(pattern: string | RegExp | string[], diffContent: string): boolean",
-        "Use spawnSync from node:child_process (already used in helpers/git.ts)",
-        "Handle missing .git directory gracefully (return empty string or warn)",
+        "Add getDiffContent(commitRef: string = 'HEAD'): string to src/helpers/git.ts",
+        "Throws error if git command fails or .git directory not found",
+        "Returns stdout as string (not empty string on error)",
+        "Update DiffProcessor to use getDiffContent() from git helper",
+        "Remove spawnSync import from DiffProcessor",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Extend RuleResult to include flagged files",
-      "description": "As a developer, I need to store which files violated rules and their error levels so violations can be tracked.",
+      "title": "Set Up Vitest Infrastructure",
+      "description": "As a developer, I need a testing framework configured so I can write unit tests for utilities and services.",
       "acceptanceCriteria": [
-        "Add FlaggedFile interface with properties: file: string, rule: Rule, errorLevel: string",
-        "Extend RuleResult interface to include flaggedFiles: FlaggedFile[]",
-        "Update RuleResult initialization in RuleProcessor",
+        "Install Vitest as dev dependency",
+        "Create vitest.config.ts at project root",
+        "Add npm scripts: npm run test:unit (run vitest)",
+        "Configure Vitest to use TypeScript",
+        "Create src/**/*.test.ts test file structure",
+        "Verify scripts are added to package.json and sorted",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Integrate DiffProcessor into RuleProcessor",
-      "description": "As a system, I need to check matched files against git diff changes so rule violations are detected automatically.",
+      "title": "Extract Reusable Pattern Matching Utility",
+      "description": "As a developer, I need a single pattern matching function so DiffProcessor and RuleProcessor don't duplicate the same logic.",
       "acceptanceCriteria": [
-        "Instantiate DiffProcessor in RuleProcessor",
-        "Cache diff content once retrieved and reuse across all rule checks",
-        "After finding files matching rule pattern, check if pattern exists in diff",
-        "For files with matches in diff, add to flaggedFiles with rule and errorLevel",
-        "Log flagged violations with file and error level",
+        "Create src/helpers/patternMatcher.ts with function hasPatternMatch(pattern: string | RegExp | string[], content: string): boolean",
+        "Handles RegExp, string[], and string patterns identically to current implementations",
+        "Update RuleProcessor.hasPatternMatch() to use utility",
+        "Update DiffProcessor.hasPatternInDiff() to use utility",
+        "Remove duplicate pattern matching code from both services",
+        "Write comprehensive unit tests for hasPatternMatch() covering all pattern types",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Handle edge cases in diff validation",
-      "description": "As a system, I need to handle various scenarios gracefully so processing doesn't fail unexpectedly.",
+      "title": "Create Reporter Service",
+      "description": "As a developer, I need a Reporter Service to handle all user-facing output so services stay silent and focused on business logic.",
       "acceptanceCriteria": [
-        "If no .git directory exists, skip diff validation (log warning, continue normally)",
-        "If diff retrieval fails, catch error and log warning (don't crash)",
-        "If pattern is RegExp, test against diff lines",
-        "If pattern is array, check if any pattern exists in diff",
-        "If pattern is string, check if string exists in diff",
+        "Create src/services/Reporter.ts with class Reporter",
+        "Implement methods: onRuleProcessed(rule: Rule): void, onFileMatched(file: string): void, onViolation(file: string, rule: Rule, level: string): void",
+        "Implement report(): void method that outputs all collected data to user",
+        "Reporter collects events during processing, outputs batch at end",
+        "Output shows: total violations, violations by error level, list of flagged files",
+        "Write unit tests for Reporter (mock Logger, verify output format)",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Output flagged files list",
-      "description": "As a user, I want to see which files violated rules in the recent commit so I can understand what needs fixing.",
+      "title": "Refactor DiffProcessor to Throw Errors",
+      "description": "As a developer, I need DiffProcessor to throw errors instead of returning empty strings so error handling is centralized at the entry point.",
       "acceptanceCriteria": [
-        "Summary output shows total flagged files count per error level",
-        "Each flagged file shows: filename, rule name, error level, matched pattern",
-        "Sorted by error level (error > warn > info) then by filename",
+        "Remove try-catch from getDiffContent() - let errors propagate",
+        "Remove Logger.warn() calls from DiffProcessor",
+        "getDiffContent() throws descriptive Error if git fails",
+        "Update RuleProcessor to handle getDiffContent() errors appropriately",
+        "Write unit tests: verify errors are thrown, not silently returned",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Refactor RuleProcessor Error Handling",
+      "description": "As a developer, I need RuleProcessor to throw errors instead of logging warnings so failures propagate to main.ts for centralized handling.",
+      "acceptanceCriteria": [
+        "Remove try-catch in findFilesWithPattern() - let file read errors propagate",
+        "Remove try-catch in processRule() - let pattern match errors propagate",
+        "Remove Logger.warn() calls from error handlers",
+        "Throw descriptive Error if file cannot be read",
+        "Throw descriptive Error if pattern matching fails",
+        "Write unit tests: verify errors are thrown in expected scenarios",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Integrate Reporter into RuleProcessor",
+      "description": "As a developer, I need RuleProcessor to call Reporter methods so all user output is centralized.",
+      "acceptanceCriteria": [
+        "Inject Reporter into RuleProcessor constructor",
+        "Call reporter.onRuleProcessed(rule) after processing each rule",
+        "Call reporter.onFileMatched(file) for each matched file",
+        "Call reporter.onViolation(file, rule, level) for each flagged violation",
+        "Remove Logger.info() calls that report progress (let Reporter handle it)",
+        "Write unit tests: verify reporter methods are called correctly",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Update CommandRunner to Use Reporter",
+      "description": "As a developer, I need CommandRunner to instantiate and use Reporter so all output flows through it.",
+      "acceptanceCriteria": [
+        "Create Reporter instance in CommandRunner",
+        "Pass Reporter to RuleProcessor constructor",
+        "Call reporter.report() after all rules are processed",
+        "Update main.ts to ensure handleError() catches all errors from CommandRunner",
+        "Test with simulated errors (missing .git, invalid pattern, file read failure)",
+        "Verify exit code 1 on any error, user-friendly error messages",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
       "notes": ""
     }
   ]

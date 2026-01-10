@@ -155,6 +155,18 @@ The PRD reader may be a junior developer or AI agent. Therefore:
 
 ---
 
+## Typechecking
+
+For Typechecking there is 3 importants command
+
+- npm run check
+- npm run check:knip
+- npm run test
+
+When there are error in the check: We can run **npm run fix** to attempt at fixing the issue.
+
+---
+
 ## Example PRD
 
 ```markdown

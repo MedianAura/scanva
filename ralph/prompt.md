@@ -2,6 +2,8 @@
 
 You are an autonomous coding agent working on a software project.
 
+**IMPORTANT**: The `ralph_out.txt` file in this directory must be in `.gitignore` and should never be committed. It contains Ralph's runtime output and is generated fresh each iteration.
+
 ## Your Task
 
 1. Read the PRD at `prd.json` (in the same directory as this file)
@@ -95,14 +97,17 @@ For any story that changes UI, you MUST verify it works in the browser:
 
 A frontend story is NOT complete until browser verification passes.
 
+## Commit
+
+1. Load the `commit-change` skill
+2. Ensure that rule defined in the skill is respected for the commit
+
 ## Stop Condition
 
-After completing a user story, check if ALL stories have `passes: true`.
-
-If ALL stories are complete and passing, reply with:
+When task is completed output.
 <promise>COMPLETE</promise>
 
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
+NEVER DO MORE THAN ONE TASK PER ITERATION
 
 ## Important
 

@@ -12,3 +12,6 @@ junit.xml
 
 # stryker temp files
 /reports
+
+# ralph output file
+ralph/ralph_out.txt
