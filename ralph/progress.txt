@@ -187,4 +187,24 @@ Thread: https://ampcode.com/threads/T-019ba94c-8c6d-7664-aec1-6c7dada48583
 "  - Tests use mocking for DiffProcessor and file module to verify error propagation"  
 "  - Vitest spy/mock patterns: vi.mocked() for module functions, vi.fn() for method mocks"  
 "  - Test assertion .rejects.toThrow() verifies error propagation from async functions"  
-"---"  
+"---"
+
+## [Sun Jan 11 01:14] - US-006
+Thread: https://ampcode.com/threads/T-019bab9d-f304-77a8-97a5-f04126280773
+- Removed try-catch blocks from findFilesWithPattern() - errors from readHeadOfFile and hasPatternMatch now propagate
+- Removed Logger.warn() calls that were catching errors
+- Updated processRules() to include comment documenting that getDiffContent errors propagate
+- All error handling now defers to caller for centralized handling
+- Created fs mock utility in tests/mocks/fs.ts using memfs for proper file existence mocking
+- Created comprehensive unit tests for RuleProcessor error handling (5 test suites with 6 tests)
+- Tests verify errors from getDiffContent propagate without being caught
+- Files changed: src/services/RuleProcessor.ts, tests/mocks/fs.ts (new), tests/unit/src/services/RuleProcessor.spec.ts (new)
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (61 tests pass)
+- Commit: feat: Refactor RuleProcessor Error Handling
+- **Learnings for future iterations:**
+  - RuleProcessor now has no try-catch blocks - all errors propagate to caller (processRules caller)
+  - The fs mock in tests/mocks/fs.ts with memfs allows proper mocking of file system operations in tests
+  - Test files should import mocks/fs.js side-effect import FIRST to ensure vi.mock is hoisted before other imports
+  - getDiffContent errors and file read errors both propagate, giving caller full control over error handling
+  - Tests with "find pattern" require file existence checks which use real fs, so tests focus on getDiffContent error propagation
+---

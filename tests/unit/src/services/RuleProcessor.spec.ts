@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Level } from '../../../../src/enums/Level.js';
 import * as fileHelper from '../../../../src/helpers/file.js';
 import * as gitModule from '../../../../src/helpers/git.js';
 import { Logger } from '../../../../src/helpers/logger.js';
 import * as patternMatcher from '../../../../src/helpers/patternMatcher.js';
+import { Level } from '../../../../src/index.js';
+import { type ScanvaConfig } from '../../../../src/index.js';
 import { RuleProcessor } from '../../../../src/services/RuleProcessor.js';
-import { type ScanvaConfig } from '../../../../src/validators/ConfigSchemas.js';
 import { getMockedFs } from '../../../mocks/fs.js';
 
 // Side effect: mocks/fs.js sets up fs mocking via vi.mock
