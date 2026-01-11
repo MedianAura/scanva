@@ -62,9 +62,10 @@ This lets users respond with "1A, 2C, 3B" for quick iteration.
 **IMPORTANT:** User story IDs must be sequential across all PRDs.
 
 **Before creating user stories:**
+
 1. Check `ralph/next` file to see the next ID to start from (e.g., if it says "US-009", start your first story at US-009)
 2. Generate all user stories for this PRD using sequential IDs (US-009, US-010, US-011, etc.)
-3. After creating the PRD, update `ralph/next` with the ID of the *next* story that should be used in the following PRD
+3. After creating the PRD, update `ralph/next` with the ID of the _next_ story that should be used in the following PRD
 
 **Why:** The ralph/next file maintains a single source of truth for ID sequencing. This allows multiple PRDs to be created without ID collisions.
 
