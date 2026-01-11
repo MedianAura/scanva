@@ -207,4 +207,26 @@ Thread: https://ampcode.com/threads/T-019bab9d-f304-77a8-97a5-f04126280773
   - Test files should import mocks/fs.js side-effect import FIRST to ensure vi.mock is hoisted before other imports
   - getDiffContent errors and file read errors both propagate, giving caller full control over error handling
   - Tests with "find pattern" require file existence checks which use real fs, so tests focus on getDiffContent error propagation
----
+  ---
+
+  ## [Sun Jan 11 02:35] - US-007
+  Thread: https://ampcode.com/threads/T-019babb8-fae4-730c-ae9a-72f038890be6
+  - Added Reporter injection into RuleProcessor constructor (optional parameter with default instance creation)
+  - Also added optional DiffProcessor injection parameter to RuleProcessor for better testability
+  - Updated RuleProcessor.processRules() to call reporter.onRuleProcessed(rule) after processing each rule
+  - Updated RuleProcessor.processRule() to call reporter.onFileMatched(file) for each file in filesWithMatches
+  - Updated RuleProcessor.processRule() to call reporter.onViolation(file, rule, level) for each flagged violation
+  - Removed Logger import and Logger.info() calls from RuleProcessor
+  - Updated CommandRunner to instantiate Reporter and pass it to RuleProcessor constructor
+  - Created comprehensive unit tests for Reporter integration (7 test suites with 16 tests total)
+  - Tests verify: constructor injection, onRuleProcessed callbacks, onFileMatched callbacks, onViolation callbacks, error propagation
+  - All tests pass with proper mocking of fs, DiffProcessor, and helper functions
+  - Files changed: src/services/RuleProcessor.ts, src/controllers/CommandRunner.ts, tests/unit/src/services/RuleProcessor.spec.ts
+  - Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (69 tests pass)
+  - **Learnings for future iterations:**
+  - DiffProcessor injection as optional parameter improves testability
+  - Spy on real Reporter instance methods instead of creating pure mocks (more accurate testing)
+  - mocks/fs.js module-level mock setup requires careful sequencing - configure mocks before vi.clearAllMocks()
+  - Partial<Type> is useful for mock objects that don't implement all properties
+  - Reporter methods should be called for each file processed, not just flagged violations
+  ---

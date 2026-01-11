@@ -1,28 +1,54 @@
-import type { IFs } from 'memfs';
-import type * as fs from 'node:fs';
-import { vi } from 'vitest';
+import { type Mock, vi } from 'vitest';
 
-// Create a type for our mocked fs with vi.fn() wrapped methods
-type MockedFs = IFs & {
-  existsSync: ReturnType<typeof vi.fn<typeof fs.existsSync>>;
-  readFileSync: ReturnType<typeof vi.fn<typeof fs.readFileSync>>;
-};
+// Define mock functions first
+const mockExistsSync = vi.fn();
+const mockWriteFileSync = vi.fn();
+const mockReadFileSync = vi.fn();
+const mockUnlinkSync = vi.fn();
+const mockReadDirectorySync = vi.fn();
+const mockReaddirSync = vi.fn();
+const mockCreateReadStream = vi.fn();
+const mockCreateWriteStream = vi.fn();
 
-// Store the mock fs objects at module level
-let mockFs: MockedFs;
+interface MockFs {
+  existsSync: Mock;
+  writeFileSync: Mock;
+  readFileSync: Mock;
+  unlinkSync: Mock;
+  readDirSync: Mock;
+  readdirSync: Mock;
+  createReadStream: Mock;
+  createWriteStream: Mock;
+}
 
-// Mock the 'fs' module
-vi.mock('node:fs', async () => {
-  const memfs = await vi.importActual<typeof import('memfs')>('memfs');
-
-  mockFs = {
-    ...memfs.fs,
-    existsSync: vi.fn(memfs.fs.existsSync),
-    readFileSync: vi.fn(memfs.fs.readFileSync),
-  } as MockedFs;
-
-  return { default: mockFs, ...mockFs };
+// Setup vi.mock (this gets hoisted)
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  const mocked = {
+    ...actual,
+    existsSync: mockExistsSync,
+    writeFileSync: mockWriteFileSync,
+    readFileSync: mockReadFileSync,
+    unlinkSync: mockUnlinkSync,
+    readDirSync: mockReadDirectorySync,
+    readdirSync: mockReaddirSync,
+    createReadStream: mockCreateReadStream,
+    createWriteStream: mockCreateWriteStream,
+  };
+  return {
+    ...mocked,
+    default: mocked,
+  };
 });
 
-// Export getters with proper types
-export const getMockedFs = (): MockedFs => mockFs;
+// Export the mock object with references to the same functions
+export const mock_Fs: MockFs = {
+  existsSync: mockExistsSync,
+  writeFileSync: mockWriteFileSync,
+  readFileSync: mockReadFileSync,
+  unlinkSync: mockUnlinkSync,
+  readDirSync: mockReadDirectorySync,
+  readdirSync: mockReaddirSync,
+  createReadStream: mockCreateReadStream,
+  createWriteStream: mockCreateWriteStream,
+};

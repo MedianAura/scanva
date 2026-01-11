@@ -3,6 +3,7 @@ import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
 import { getFilesFromCommit } from '../helpers/git.js';
 import { Logger } from '../helpers/logger.js';
 import { ConfigurationNotFoundError } from '../models/Errors.js';
+import { Reporter } from '../services/Reporter.js';
 import { RuleProcessor, type RuleResult } from '../services/RuleProcessor.js';
 import { type ScanvaConfig, ScanvaConfigSchema } from '../validators/ConfigSchemas.js';
 
@@ -17,7 +18,8 @@ export class CommandRunner {
     const config = await this.parseConfig(result.config);
     const files = getFilesFromCommit(commitHash);
 
-    const ruleProcessor = new RuleProcessor();
+    const reporter = new Reporter();
+    const ruleProcessor = new RuleProcessor(reporter);
     const ruleResults = await ruleProcessor.processRules(config, files);
 
     // Output flagged files summary

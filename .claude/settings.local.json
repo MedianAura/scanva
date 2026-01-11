@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:unit:*)",
+      "Bash(find:*)",
+      "Bash(npm run check:*)",
+      "Bash(npm run fix:*)"
+    ]
+  }
+}
