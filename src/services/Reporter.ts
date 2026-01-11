@@ -45,7 +45,7 @@ export class Reporter {
     }
 
     // Output violations grouped by level
-    const levelOrder = [Level.Error, Level.Warning, Level.Info];
+    const levelOrder = [Level.Error, Level.Warning];
     for (const level of levelOrder) {
       const violations = violationsByLevel[level];
       if (violations) {

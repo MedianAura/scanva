@@ -57,8 +57,18 @@ This lets users respond with "1A, 2C, 3B" for quick iteration.
 
 ## Step 2: PRD Structure
 
-Make sure to refer to @ralph/next or @ralph/prd.json to get the next sequential number for the user story.
-Generate the PRD with these sections:
+### User Story ID Sequencing
+
+**IMPORTANT:** User story IDs must be sequential across all PRDs.
+
+**Before creating user stories:**
+1. Check `ralph/next` file to see the next ID to start from (e.g., if it says "US-009", start your first story at US-009)
+2. Generate all user stories for this PRD using sequential IDs (US-009, US-010, US-011, etc.)
+3. After creating the PRD, update `ralph/next` with the ID of the *next* story that should be used in the following PRD
+
+**Why:** The ralph/next file maintains a single source of truth for ID sequencing. This allows multiple PRDs to be created without ID collisions.
+
+Now generate the PRD with these sections:
 
 ### 1. Introduction/Overview
 
@@ -271,8 +281,11 @@ Before saving the PRD:
 
 - [ ] Asked clarifying questions with lettered options
 - [ ] Incorporated user's answers
+- [ ] Read `ralph/next` to determine starting user story ID
+- [ ] User stories are numbered sequentially starting from the ID in `ralph/next`
 - [ ] User stories are small and specific
 - [ ] Functional requirements are numbered and unambiguous
 - [ ] Non-goals section defines clear boundaries
 - [ ] Saved to `tasks/prd-[feature-name].md`
-- [ ] Update `ralph/next` with the next logical id for User Story
+- [ ] Updated `ralph/next` file with the next sequential ID (the ID after the last story in this PRD)
+  - Example: If this PRD has US-009 through US-013, update `ralph/next` to contain "US-014"

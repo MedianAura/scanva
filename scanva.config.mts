@@ -4,7 +4,12 @@ export default defineConfig({
   rules: [
     {
       files: '**/*.ts',
-      pattern: 'SomethingInFiles',
+      pattern: 'import',
+      level: Level.Error,
+    },
+    {
+      files: '**/*.ts',
+      pattern: 'await',
       level: Level.Warning,
     },
   ],
