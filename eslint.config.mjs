@@ -87,4 +87,12 @@ export default defineConfig([
       'zod/require-strict': 2,
     },
   },
+
+  // Allow 'any' type in test files
+  {
+    files: ['tests/**/*.ts', 'tests/**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ]);

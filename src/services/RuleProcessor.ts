@@ -1,10 +1,10 @@
 import multimatch from 'multimatch';
 import { existsSync } from 'node:fs';
 import { readHeadOfFile } from '../helpers/file.js';
-import { Logger } from '../helpers/logger.js';
 import { hasPatternMatch } from '../helpers/patternMatcher.js';
 import { type Rule, type ScanvaConfig } from '../validators/ConfigSchemas.js';
 import { DiffProcessor } from './DiffProcessor.js';
+import { Reporter } from './Reporter.js';
 
 export interface FlaggedFile {
   file: string;
@@ -20,22 +20,24 @@ export interface RuleResult {
 }
 
 export class RuleProcessor {
-  private diffProcessor = new DiffProcessor();
+  private diffProcessor: DiffProcessor;
   private cachedDiffContent: string | undefined;
+  private reporter: Reporter;
+
+  public constructor(reporter: Reporter, diffProcessor?: DiffProcessor) {
+    this.reporter = reporter;
+    this.diffProcessor = diffProcessor ?? new DiffProcessor();
+  }
 
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
-    try {
-      this.cachedDiffContent = this.diffProcessor.getDiffContent();
-    } catch (error) {
-      Logger.warn(`Failed to retrieve git diff: ${error instanceof Error ? error.message : String(error)}`);
-      this.cachedDiffContent = undefined;
-    }
+    // Error propagates if getDiffContent fails
+    this.cachedDiffContent = this.diffProcessor.getDiffContent();
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
-      Logger.info(`Rule found matches in ${result.filesWithMatches.length} files: ${result.filesWithMatches.join(', ')}`);
+      this.reporter.onRuleProcessed(rule);
       results.push(result);
     }
 
@@ -48,20 +50,15 @@ export class RuleProcessor {
     const flaggedFiles: FlaggedFile[] = [];
 
     // Check if matched files have patterns in the diff
-    if (this.cachedDiffContent !== undefined) {
-      for (const file of filesWithMatches) {
-        try {
-          if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent)) {
-            flaggedFiles.push({
-              file,
-              rule,
-              errorLevel: rule.level,
-            });
-            Logger.info(`Flagged violation - File: ${file}, Rule: ${rule.pattern}, Error Level: ${rule.level}`);
-          }
-        } catch (error) {
-          Logger.warn(`Error checking pattern for file ${file}: ${error instanceof Error ? error.message : String(error)}`);
-        }
+    for (const file of filesWithMatches) {
+      this.reporter.onFileMatched(file);
+      if (this.diffProcessor.hasPatternInDiff(rule.find || rule.pattern, this.cachedDiffContent!)) {
+        flaggedFiles.push({
+          file,
+          rule,
+          errorLevel: rule.level,
+        });
+        this.reporter.onViolation(file, rule, rule.level);
       }
     }
 
@@ -88,14 +85,12 @@ export class RuleProcessor {
     const filesWithMatches: string[] = [];
 
     for (const file of files) {
-      try {
-        const headContent = await readHeadOfFile(file, rule.head);
+      // Errors from readHeadOfFile propagate to caller
+      const headContent = await readHeadOfFile(file, rule.head);
 
-        if (hasPatternMatch(rule.find, headContent)) {
-          filesWithMatches.push(file);
-        }
-      } catch {
-        Logger.warn(`Could not read file: ${file}`);
+      // Errors from hasPatternMatch propagate to caller
+      if (hasPatternMatch(rule.find, headContent)) {
+        filesWithMatches.push(file);
       }
     }
 
