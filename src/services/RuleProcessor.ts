@@ -26,6 +26,7 @@ export class RuleProcessor {
   public async processRules(config: ScanvaConfig, files: string[]): Promise<RuleResult[]> {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
+    // Error propagates if getDiffContent fails
     this.cachedDiffContent = this.diffProcessor.getDiffContent();
 
     for (const rule of config.rules) {
@@ -77,8 +78,10 @@ export class RuleProcessor {
     const filesWithMatches: string[] = [];
 
     for (const file of files) {
+      // Errors from readHeadOfFile propagate to caller
       const headContent = await readHeadOfFile(file, rule.head);
 
+      // Errors from hasPatternMatch propagate to caller
       if (hasPatternMatch(rule.find, headContent)) {
         filesWithMatches.push(file);
       }
