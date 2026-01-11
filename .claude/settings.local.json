@@ -4,7 +4,13 @@
       "Bash(npm run test:unit:*)",
       "Bash(find:*)",
       "Bash(npm run check:*)",
-      "Bash(npm run fix:*)"
+      "Bash(npm run fix:*)",
+      "Bash(ln:*)",
+      "Bash(npm run build:*)",
+      "Skill(commit-change)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(printf:*)"
     ]
   }
 }

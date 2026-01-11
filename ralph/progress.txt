@@ -230,3 +230,25 @@ Thread: https://ampcode.com/threads/T-019bab9d-f304-77a8-97a5-f04126280773
   - Partial<Type> is useful for mock objects that don't implement all properties
   - Reporter methods should be called for each file processed, not just flagged violations
   ---
+
+## [Sun Jan 11 14:30] - US-008
+Thread: AMP_CURRENT_THREAD_ID
+- Refactored CommandRunner to use Reporter service for centralized output handling
+- Removed outputFlaggedFilesSummary() method - Reporter.report() now handles all violation output
+- Removed unused RuleResult import from CommandRunner
+- Updated error checking to use falsy check (\!result) instead of null check for better type safety
+- Created comprehensive unit tests in tests/unit/src/controllers/CommandRunner.spec.ts (4 test suites)
+- Tests verify: Reporter.report() is called after processing, config not found throws error, getDiffContent errors propagate, exit code handling
+- All tests use proper Level enum values and schema-compliant config format
+- Files changed: src/controllers/CommandRunner.ts, tests/unit/src/controllers/CommandRunner.spec.ts (new)
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (73 tests pass)
+- Commit: feat: Integrate Reporter into CommandRunner
+- **Learnings for future iterations:**
+  - cosmiconfig returns null (not undefined) when config not found - use falsy check for cleaner code
+  - eslint-disable-next-line unicorn/no-null required when testing with null values from external APIs
+  - CommandRunner delegates all output to Reporter - no direct Logger calls for violations
+  - Error propagation verified: getDiffContent errors, config parsing errors all propagate to main.ts
+  - handleError() in main.ts provides centralized error handling with exit code 1
+  - Config schema uses Level enum values (Level.Error, Level.Warning, Level.Info) not strings
+  - Config schema uses 'files' property (not 'paths') for glob patterns
+---

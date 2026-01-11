@@ -57,7 +57,6 @@ This lets users respond with "1A, 2C, 3B" for quick iteration.
 
 ## Step 2: PRD Structure
 
-Make sure to refer to @ralph/next or @ralph/prd.json to get the next sequential number for the user story.
 Generate the PRD with these sections:
 
 ### 1. Introduction/Overview
@@ -275,4 +274,3 @@ Before saving the PRD:
 - [ ] Functional requirements are numbered and unambiguous
 - [ ] Non-goals section defines clear boundaries
 - [ ] Saved to `tasks/prd-[feature-name].md`
-- [ ] Update `ralph/next` with the next logical id for User Story
