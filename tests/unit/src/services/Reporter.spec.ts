@@ -84,9 +84,10 @@ describe('Reporter', () => {
 
   describe('report', () => {
     it('should output success message when no violations', () => {
-      reporter.report();
+      const hasErrors = reporter.report();
 
       expect(Logger.success).toHaveBeenCalledWith('No violations found!');
+      expect(hasErrors).toBe(false);
     });
 
     it('should not output when violations exist', () => {
@@ -306,6 +307,48 @@ describe('Reporter', () => {
       reporter.report();
 
       expect(consoleLogSpy).toHaveBeenCalledWith('0 Error(s), 2 Warning(s)');
+    });
+
+    it('should return true when errors exist', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(true);
+    });
+
+    it('should return false when only warnings exist', () => {
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(false);
+    });
+
+    it('should return true when both errors and warnings exist', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(true);
     });
   });
 });

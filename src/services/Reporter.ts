@@ -25,10 +25,10 @@ export class Reporter {
     this.violations.push({ rule, file, level });
   }
 
-  public report(): void {
+  public report(): boolean {
     if (this.violations.length === 0) {
       Logger.success('No violations found!');
-      return;
+      return false;
     }
 
     // Group violations by file
@@ -56,5 +56,8 @@ export class Reporter {
     const errorCount = this.violations.filter((v) => v.level === Level.Error).length;
     const warningCount = this.violations.filter((v) => v.level === Level.Warning).length;
     console.log(`${errorCount} Error(s), ${warningCount} Warning(s)`);
+
+    // Return true if there are errors (for exit code)
+    return errorCount > 0;
   }
 }

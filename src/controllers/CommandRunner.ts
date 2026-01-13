@@ -8,7 +8,7 @@ import { RuleProcessor } from '../services/RuleProcessor.js';
 import { type ScanvaConfig, ScanvaConfigSchema } from '../validators/ConfigSchemas.js';
 
 export class CommandRunner {
-  public async run(commitHash: string): Promise<void> {
+  public async run(commitHash: string): Promise<number> {
     const result = await this.getConfig();
 
     if (!result) {
@@ -23,9 +23,12 @@ export class CommandRunner {
     await ruleProcessor.processRules(config, files);
 
     // Output all collected violations
-    reporter.report();
+    const hasErrors = reporter.report();
 
     Logger.success('Job executed successfully');
+
+    // Return exit code 1 if errors exist, 0 otherwise
+    return hasErrors ? 1 : 0;
   }
 
   private async parseConfig(config: unknown): Promise<ScanvaConfig> {

@@ -53,3 +53,24 @@ Thread: <AMP_CURRENT_THREAD_ID>
   - Next user story (US-009) will fix exit codes for validation errors
 ---
 
+## 2026-01-12 22:53 - US-009
+Thread: <AMP_CURRENT_THREAD_ID>
+- Implemented exit code = 1 when ERROR violations exist, 0 otherwise
+- Modified Reporter.report() to return boolean indicating if errors exist
+- Updated CommandRunner.run() to return exit code from reporter
+- Modified main.ts to capture and return exit code from CommandRunner
+- Updated bin/run.js to call process.exit() with the returned exit code
+- Added ESLint global comment for process in bin/run.js
+- Added unit tests for exit code return values (errors, warnings only, no violations)
+- All quality checks passed (check, build, test:unit:coverage)
+- Verified exit code behavior: 'node ./bin/run.js --commit ae84be2 && echo Pass || echo Fail' outputs 'Fail'
+- Files changed: src/services/Reporter.ts, src/controllers/CommandRunner.ts, src/main.ts, bin/run.js, tests/unit/src/services/Reporter.spec.ts
+- **Learnings for future iterations:**
+  - Exit code propagation requires changes through the entire call stack (Reporter → CommandRunner → main → bin/run.js)
+  - Module-level variable in main.ts used to capture exit code from commander action
+  - ESLint flat config requires /* global */ comments instead of /* eslint-env */
+  - Reporter returns true when errors exist (for exit code 1), false otherwise (for exit code 0)
+  - Warnings do NOT affect exit code (exit code 0 when only warnings exist)
+  - All user stories in ralph/scanva-ux-improvements PRD are now complete
+---
+
