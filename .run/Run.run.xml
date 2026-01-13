@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run" type="CompoundRunConfigurationType">
+    <toRun name="check" type="js.build_tools.npm" />
+    <toRun name="check:knip" type="js.build_tools.npm" />
+    <toRun name="fix" type="js.build_tools.npm" />
+    <toRun name="test:unit" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>

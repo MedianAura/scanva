@@ -30,38 +30,5 @@ export class Reporter {
       Logger.success('No violations found!');
       return;
     }
-
-    Logger.skipLine();
-    Logger.println(`Total violations: ${this.violations.length}`);
-    Logger.skipLine();
-
-    // Group violations by error level
-    const violationsByLevel: Record<Level, ReportEvent[]> = {} as Record<Level, ReportEvent[]>;
-    for (const violation of this.violations) {
-      if (!violationsByLevel[violation.level]) {
-        violationsByLevel[violation.level] = [];
-      }
-      violationsByLevel[violation.level]!.push(violation);
-    }
-
-    // Output violations grouped by level
-    const levelOrder = [Level.Error, Level.Warning];
-    for (const level of levelOrder) {
-      const violations = violationsByLevel[level];
-      if (violations) {
-        Logger.println(`${level.toUpperCase()}: ${violations.length}`);
-        for (const violation of violations) {
-          Logger.println(`  - ${violation.file}`);
-        }
-        Logger.skipLine();
-      }
-    }
-
-    // List flagged files
-    const flaggedFiles = [...this.fileMatches].toSorted();
-    Logger.println(`Flagged files: ${flaggedFiles.length}`);
-    for (const file of flaggedFiles) {
-      Logger.println(`  - ${file}`);
-    }
   }
 }
