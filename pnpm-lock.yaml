@@ -63,6 +63,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.0.16
         version: 4.0.16(vitest@4.0.16(@types/node@24.10.4)(happy-dom@20.1.0)(jiti@2.6.1)(yaml@2.8.2))
+      alias-kitchen:
+        specifier: ^0.2.4
+        version: 0.2.4
       eslint:
         specifier: ^9.39.2
         version: 9.39.2(jiti@2.6.1)
@@ -966,6 +969,9 @@ packages:
 
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+
+  alias-kitchen@0.2.4:
+    resolution: {integrity: sha512-+73I3QJ+cdIozAxYyhm82yehb45C+u+gvmEOdWexlZgqkOiPLqctEH/lznSLnCXye7Df0bXQziUAmj7tEE0mag==}
 
   ansi-align@3.0.1:
     resolution: {integrity: sha512-IOfwwBF5iczOjp/WeY4YxyjqAFMQoZufdQWDd19SEExbVLNXqvpzSJ/M7Za4/sCPmQ0+GRquoA7bGcINcxew6w==}
@@ -3458,6 +3464,10 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
+
+  alias-kitchen@0.2.4:
+    dependencies:
+      get-tsconfig: 4.13.0
 
   ansi-align@3.0.1:
     dependencies:

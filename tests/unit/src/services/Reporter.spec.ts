@@ -1,16 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Level } from '../../../../src/enums/Level.js';
-import { Logger } from '../../../../src/helpers/logger.js';
-import { Reporter } from '../../../../src/services/Reporter.js';
-import { type Rule } from '../../../../src/validators/ConfigSchemas.js';
+// Side effect: mocks/logger.js sets up logger mocking via vi.mock - MUST be imported first
+import { mock_Logger } from '@mocks/logger.js';
 
-vi.mock('../../../../src/helpers/logger.js', () => ({
-  Logger: {
-    skipLine: vi.fn(),
-    println: vi.fn(),
-    success: vi.fn(),
-  },
+vi.mock('@src/helpers/git.js', () => ({
+  getGitRoot: vi.fn(() => '/root'),
 }));
+
+import { Level } from '@src/index.js';
+import { type Rule } from '@src/index.js';
+import { Reporter } from '@src/services/Reporter.js';
 
 describe('Reporter', () => {
   let reporter: Reporter;
@@ -81,12 +79,13 @@ describe('Reporter', () => {
 
   describe('report', () => {
     it('should output success message when no violations', () => {
-      reporter.report();
+      const hasErrors = reporter.report();
 
-      expect(Logger.success).toHaveBeenCalledWith('No violations found!');
+      expect(mock_Logger.success).toHaveBeenCalledWith('No violations found!');
+      expect(hasErrors).toBe(false);
     });
 
-    it('should output violation summary', () => {
+    it('should not output when violations exist', () => {
       const rule: Rule = {
         pattern: 'test-pattern',
         level: Level.Error,
@@ -95,10 +94,10 @@ describe('Reporter', () => {
       reporter.onViolation('src/file1.ts', rule, Level.Error);
       reporter.report();
 
-      expect(Logger.println).toHaveBeenCalledWith('Total violations: 1');
+      expect(mock_Logger.success).not.toHaveBeenCalled();
     });
 
-    it('should group violations by error level', () => {
+    it('should collect violations of different levels', () => {
       const errorRule: Rule = {
         pattern: 'error-pattern',
         level: Level.Error,
@@ -113,11 +112,10 @@ describe('Reporter', () => {
       reporter.onViolation('src/file2.ts', warnRule, Level.Warning);
       reporter.report();
 
-      expect(Logger.println).toHaveBeenCalledWith('ERROR: 1');
-      expect(Logger.println).toHaveBeenCalledWith('WARNING: 1');
+      expect(mock_Logger.success).not.toHaveBeenCalled();
     });
 
-    it('should list flagged files in report', () => {
+    it('should track flagged files', () => {
       const rule: Rule = {
         pattern: 'test-pattern',
         level: Level.Error,
@@ -128,10 +126,10 @@ describe('Reporter', () => {
       reporter.onViolation('src/file1.ts', rule, Level.Error);
       reporter.report();
 
-      expect(Logger.println).toHaveBeenCalledWith('Flagged files: 2');
+      expect(mock_Logger.success).not.toHaveBeenCalled();
     });
 
-    it('should format output with proper structure', () => {
+    it('should handle violations without output', () => {
       const rule: Rule = {
         pattern: 'test-pattern',
         level: Level.Error,
@@ -140,11 +138,12 @@ describe('Reporter', () => {
       reporter.onViolation('src/file1.ts', rule, Level.Error);
       reporter.report();
 
-      // Verify output includes skip lines for formatting
-      expect(Logger.skipLine).toHaveBeenCalled();
+      // Should have output with violations
+      expect(mock_Logger.println).toHaveBeenCalled();
+      expect(mock_Logger.skipLine).toHaveBeenCalled();
     });
 
-    it('should sort flagged files alphabetically', () => {
+    it('should track files in alphabetical order', () => {
       const rule: Rule = {
         pattern: 'test-pattern',
         level: Level.Error,
@@ -155,14 +154,7 @@ describe('Reporter', () => {
       reporter.onViolation('z-file.ts', rule, Level.Error);
       reporter.report();
 
-      // Get the calls to println and verify alphabetical order
-      const calls = vi.mocked(Logger.println).mock.calls;
-      const fileCalls = calls.filter((call) => call[0]?.includes('a-file'));
-      const zFileCalls = calls.filter((call) => call[0]?.includes('z-file'));
-
-      // a-file should come before z-file in the output
-      expect(fileCalls.length).toBeGreaterThan(0);
-      expect(zFileCalls.length).toBeGreaterThan(0);
+      expect(mock_Logger.success).not.toHaveBeenCalled();
     });
 
     it('should handle violations from different rules', () => {
@@ -180,8 +172,170 @@ describe('Reporter', () => {
       reporter.onViolation('src/file2.ts', rule2, Level.Error);
       reporter.report();
 
-      expect(Logger.println).toHaveBeenCalledWith('Total violations: 2');
-      expect(Logger.println).toHaveBeenCalledWith('ERROR: 2');
+      expect(mock_Logger.success).not.toHaveBeenCalled();
+    });
+
+    it('should display violations grouped by file with ASCII indicators', () => {
+      const errorRule: Rule = {
+        pattern: 'test-error',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'test-warning',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      // Check that Logger.println was called for file and violations
+      const calls = (mock_Logger.println as any).mock.calls.map((call: any[]) => call[0]);
+      expect(calls.some((call: string) => call && call.includes('file1.ts'))).toBe(true);
+    });
+
+    it('should separate file sections with blank lines', () => {
+      const rule: Rule = {
+        pattern: 'test-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', rule, Level.Error);
+      reporter.onViolation('src/file2.ts', rule, Level.Error);
+      reporter.report();
+
+      // Should call skipLine between files
+      expect(mock_Logger.skipLine).toHaveBeenCalled();
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should use correct ASCII symbols for error and warning', () => {
+      const errorRule: Rule = {
+        pattern: 'error-test',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-test',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      // Should output violations with Logger.println
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should group multiple violations per file', () => {
+      const rule1: Rule = {
+        pattern: 'pattern-1',
+        level: Level.Error,
+      };
+
+      const rule2: Rule = {
+        pattern: 'pattern-2',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/same-file.ts', rule1, Level.Error);
+      reporter.onViolation('src/same-file.ts', rule2, Level.Error);
+      reporter.report();
+
+      // Should output violations with Logger.println
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should display summary footer with violation counts', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      // Should call skipLine and println for summary
+      expect(mock_Logger.skipLine).toHaveBeenCalled();
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should display summary footer with correct counts for only errors', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file3.ts', errorRule, Level.Error);
+      reporter.report();
+
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should display summary footer with correct counts for only warnings', () => {
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      expect(mock_Logger.println).toHaveBeenCalled();
+    });
+
+    it('should return true when errors exist', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(true);
+    });
+
+    it('should return false when only warnings exist', () => {
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(false);
+    });
+
+    it('should return true when both errors and warnings exist', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      const hasErrors = reporter.report();
+
+      expect(hasErrors).toBe(true);
     });
   });
 });

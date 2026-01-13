@@ -43,6 +43,10 @@ function title(message: string): void {
   println(chalk.bold.magentaBright('[SCANVA] ') + message);
 }
 
+function separator(length: number = 50): void {
+  println(chalk.gray('─'.repeat(length)));
+}
+
 export const Logger = {
   print: print,
   println: println,
@@ -53,4 +57,5 @@ export const Logger = {
   error: error,
   warn: warn,
   info: info,
+  separator: separator,
 };

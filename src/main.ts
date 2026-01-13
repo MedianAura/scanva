@@ -6,18 +6,21 @@ import { Logger } from './helpers/logger.js';
 
 const packageJSON = readPackageSync();
 
+let exitCode = 0;
+
 program
   .name(packageJSON.name)
   .description(packageJSON.description ?? '')
   .version(packageJSON.version)
   .option('-c, --commit <hash>', 'Specify commit hash to analyze', 'HEAD')
   .action(async ({ commit }) => {
-    await new CommandRunner().run(commit);
+    exitCode = await new CommandRunner().run(commit);
   });
 
 export async function run(): Promise<number> {
   Logger.clear();
   Logger.title('Scanva - Validation Tools');
+  Logger.separator();
 
   try {
     await program.parseAsync();
@@ -25,5 +28,5 @@ export async function run(): Promise<number> {
     return handleError(error);
   }
 
-  return 0;
+  return exitCode;
 }

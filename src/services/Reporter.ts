@@ -1,4 +1,7 @@
+import chalk from 'chalk';
+import path from 'node:path';
 import { Level } from '../enums/Level.js';
+import { getGitRoot } from '../helpers/git.js';
 import { Logger } from '../helpers/logger.js';
 import { type Rule } from '../validators/ConfigSchemas.js';
 
@@ -25,43 +28,44 @@ export class Reporter {
     this.violations.push({ rule, file, level });
   }
 
-  public report(): void {
+  public report(): boolean {
     if (this.violations.length === 0) {
       Logger.success('No violations found!');
-      return;
+      return false;
     }
 
-    Logger.skipLine();
-    Logger.println(`Total violations: ${this.violations.length}`);
-    Logger.skipLine();
-
-    // Group violations by error level
-    const violationsByLevel: Record<Level, ReportEvent[]> = {} as Record<Level, ReportEvent[]>;
+    // Group violations by file
+    const violationsByFile = new Map<string, ReportEvent[]>();
     for (const violation of this.violations) {
-      if (!violationsByLevel[violation.level]) {
-        violationsByLevel[violation.level] = [];
-      }
-      violationsByLevel[violation.level]!.push(violation);
+      const existing = violationsByFile.get(violation.file) || [];
+      existing.push(violation);
+      violationsByFile.set(violation.file, existing);
     }
 
-    // Output violations grouped by level
-    const levelOrder = [Level.Error, Level.Warning];
-    for (const level of levelOrder) {
-      const violations = violationsByLevel[level];
-      if (violations) {
-        Logger.println(`${level.toUpperCase()}: ${violations.length}`);
-        for (const violation of violations) {
-          Logger.println(`  - ${violation.file}`);
-        }
-        Logger.skipLine();
+    // Display violations grouped by file
+    const gitRoot = getGitRoot();
+    for (const [file, fileViolations] of violationsByFile) {
+      const relativePath = path.relative(gitRoot, file);
+      Logger.println(chalk.underline(relativePath));
+      for (const violation of fileViolations) {
+        const indicator = violation.level === Level.Error ? chalk.red('✕') : chalk.yellow('△');
+        const message = violation.rule.pattern;
+        const ruleId = chalk.dim(violation.rule.pattern);
+        Logger.println(`${indicator}  ${message.padEnd(40)} ${ruleId}`);
       }
+      Logger.skipLine();
     }
 
-    // List flagged files
-    const flaggedFiles = [...this.fileMatches].toSorted();
-    Logger.println(`Flagged files: ${flaggedFiles.length}`);
-    for (const file of flaggedFiles) {
-      Logger.println(`  - ${file}`);
-    }
+    // Display summary footer with violation counts
+    const errorCount = this.violations.filter((v) => v.level === Level.Error).length;
+    const warningCount = this.violations.filter((v) => v.level === Level.Warning).length;
+
+    const errorText = chalk.red(`${errorCount} error${errorCount === 1 ? '' : 's'}`);
+    const warningText = chalk.yellow(`${warningCount} warning${warningCount === 1 ? '' : 's'}`);
+    Logger.println(`${errorText}`);
+    Logger.println(`${warningText}`);
+
+    // Return true if there are errors (for exit code)
+    return errorCount > 0;
   }
 }

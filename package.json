@@ -48,6 +48,7 @@
     "@types/update-notifier": "^6.0.8",
     "@typescript-eslint/parser": "^8.52.0",
     "@vitest/coverage-v8": "^4.0.16",
+    "alias-kitchen": "^0.2.4",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-formatter-pretty": "^7.0.0",

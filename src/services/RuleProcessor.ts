@@ -23,9 +23,11 @@ export class RuleProcessor {
   private diffProcessor: DiffProcessor;
   private cachedDiffContent: string | undefined;
   private reporter: Reporter;
+  private commitHash: string;
 
-  public constructor(reporter: Reporter, diffProcessor?: DiffProcessor) {
+  public constructor(reporter: Reporter, commitHash: string = 'HEAD', diffProcessor?: DiffProcessor) {
     this.reporter = reporter;
+    this.commitHash = commitHash;
     this.diffProcessor = diffProcessor ?? new DiffProcessor();
   }
 
@@ -33,7 +35,7 @@ export class RuleProcessor {
     const results: RuleResult[] = [];
     // Cache diff content once for all rules
     // Error propagates if getDiffContent fails
-    this.cachedDiffContent = this.diffProcessor.getDiffContent();
+    this.cachedDiffContent = this.diffProcessor.getDiffContent(this.commitHash);
 
     for (const rule of config.rules) {
       const result = await this.processRule(rule, files);
