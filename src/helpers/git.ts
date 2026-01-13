@@ -33,7 +33,10 @@ export function getFilesFromCommit(commitHash: string = 'HEAD'): string[] {
 
 export function getDiffContent(commitReference: string = 'HEAD'): string {
   const command = 'git';
-  const commandSwitch = ['diff', commitReference];
+  // Use diff-tree to get the changes in the specific commit
+  // -p flag shows the patch (diff content)
+  // --no-commit-id omits the commit hash from output
+  const commandSwitch = ['diff-tree', '-p', '--no-commit-id', commitReference];
   const diffIO = spawnSync(command, commandSwitch);
 
   if (diffIO.error) {

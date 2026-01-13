@@ -18,7 +18,7 @@ export class CommandRunner {
     const files = getFilesFromCommit(commitHash);
 
     const reporter = new Reporter();
-    const ruleProcessor = new RuleProcessor(reporter);
+    const ruleProcessor = new RuleProcessor(reporter, commitHash);
     await ruleProcessor.processRules(config, files);
 
     // Output all collected violations

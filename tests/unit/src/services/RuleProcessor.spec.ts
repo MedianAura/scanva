@@ -66,7 +66,7 @@ describe('RuleProcessor', () => {
         flaggedFiles: [],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
 
       // Mock the private processRule method
       const processRuleSpy = vi.spyOn(ruleProcessor as any, 'processRule');
@@ -94,7 +94,7 @@ describe('RuleProcessor', () => {
         ],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
 
       // Mock processRule to prevent actual execution
       vi.spyOn(ruleProcessor as any, 'processRule').mockResolvedValue({
@@ -120,7 +120,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       await expect(ruleProcessor.processRules(config, ['file.ts'])).rejects.toThrow(mockError);
     });
   });
@@ -131,7 +131,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts', 'file3.js']);
 
       expect(results[0]?.matchedFiles).toEqual(['file1.ts', 'file2.ts', 'file3.js']);
@@ -148,7 +148,7 @@ describe('RuleProcessor', () => {
         ],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts', 'file3.js']);
 
       expect(results[0]?.matchedFiles).toEqual(['file1.ts', 'file2.ts']);
@@ -161,7 +161,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'missing.ts', 'file2.ts']);
 
       expect(results[0]?.matchedFiles).toEqual(['file1.ts', 'file2.ts']);
@@ -174,7 +174,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts']);
 
       expect(results[0]?.filesWithMatches).toEqual(['file1.ts', 'file2.ts']);
@@ -197,7 +197,7 @@ describe('RuleProcessor', () => {
         return pattern === 'find-pattern'; // Only match the find pattern
       });
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts']);
 
       expect(results[0]?.filesWithMatches).toEqual(['file1.ts', 'file2.ts']);
@@ -222,7 +222,7 @@ describe('RuleProcessor', () => {
         return content === 'matching content';
       });
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts']);
 
       expect(results[0]?.filesWithMatches).toEqual(['file1.ts']);
@@ -244,7 +244,7 @@ describe('RuleProcessor', () => {
         ],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       await expect(ruleProcessor.processRules(config, ['file.ts'])).rejects.toThrow(mockError);
     });
   });
@@ -257,7 +257,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts']);
 
       expect(results[0]?.flaggedFiles).toHaveLength(2);
@@ -281,7 +281,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'test-pattern', level: Level.Error }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       const results = await ruleProcessor.processRules(config, ['file1.ts', 'file2.ts']);
 
       expect(results[0]?.flaggedFiles).toHaveLength(0);
@@ -303,7 +303,7 @@ describe('RuleProcessor', () => {
       vi.mocked(patternMatcher.hasPatternMatch).mockReturnValue(true);
       vi.mocked(mockDiffProcessor.hasPatternInDiff).mockReturnValue(true);
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       await ruleProcessor.processRules(config, ['file1.ts']);
 
       // Should check for find-pattern in diff, not test-pattern
@@ -317,7 +317,7 @@ describe('RuleProcessor', () => {
         rules: [{ pattern: 'warn-pattern', level: Level.Warning }],
       };
 
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       await ruleProcessor.processRules(config, ['file.ts']);
 
       expect(mockReporter.onViolation).toHaveBeenCalledWith('file.ts', config.rules[0], Level.Warning);
@@ -326,7 +326,7 @@ describe('RuleProcessor', () => {
 
   describe('constructor', () => {
     it('accepts Reporter and DiffProcessor instances', () => {
-      const ruleProcessor = new RuleProcessor(mockReporter, mockDiffProcessor);
+      const ruleProcessor = new RuleProcessor(mockReporter, 'HEAD', mockDiffProcessor);
       expect(ruleProcessor).toBeDefined();
     });
 
