@@ -1,0 +1,254 @@
+# Ralph Progress Log
+Started: Sat Jan 10 12:36:19 EST 2026
+---
+
+## Codebase Patterns
+- Use `spawnSync` from node:child_process for git commands (consistent pattern in helpers/git.ts)
+- Services should cache expensive operations (e.g., DiffProcessor caches diff content)
+- Handle git operations gracefully - return empty string or undefined if .git not found instead of throwing
+- Logger utility (Logger.warn, Logger.info) is standard for logging across services
+
+---
+
+## [Sat Jan 10 13:30] - US-001
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Created DiffProcessor service class in src/services/DiffProcessor.ts
+- Implemented getDiffContent() method using spawnSync to retrieve git diff HEAD
+- Implemented hasPatternInDiff() supporting string, RegExp, and array patterns
+- Cached diff content for reuse across multiple pattern checks
+- Graceful error handling - returns empty string if .git missing or git fails
+- Files changed: src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - The codebase follows a pattern where git operations use spawnSync (not promises)
+  - Services are placed in src/services/ directory alongside RuleProcessor
+  - Logger is imported from helpers/logger.js for consistent logging
+  - Error handling returns gracefully rather than throwing - follow this pattern for reliability
+---
+
+## [Sat Jan 10 13:35] - US-002
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added FlaggedFile interface to RuleProcessor with properties: file, rule, errorLevel
+- Extended RuleResult interface to include flaggedFiles array
+- Updated processRule() to initialize flaggedFiles as empty array
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Interfaces are defined locally in service files (not exported separately)
+  - FlaggedFile stores references to the Rule object itself (not just name/id)
+  - Error level comes from rule.level (already part of Rule interface)
+---
+
+## [Sat Jan 10 13:40] - US-003
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Imported DiffProcessor into RuleProcessor
+- Instantiated DiffProcessor as class property
+- Cache diff content once in processRules() using cachedDiffContent
+- Updated processRule() to check if matched files' patterns exist in cached diff
+- Create FlaggedFile entries for files with pattern matches in diff
+- Log violations with file, rule pattern, and error level
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Cache diff content at the processRules level (not in each rule check) for efficiency
+  - Use rule.find (if present) for pattern checking, fallback to rule.pattern
+  - Check if pattern exists IN the DIFF content, not just that the file exists
+  - flaggedFiles only populated if diff content retrieved successfully
+---
+
+## [Sat Jan 10 13:45] - US-004
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Added graceful handling for missing .git directory - logs warning and continues
+- Wrapped pattern checking in try/catch to handle errors without crashing
+- Check for empty diff content (indicates git unavailable) and skip validation
+- All pattern types handled: RegExp (test), Array (some), String (includes)
+- Log warnings when diff unavailable or pattern checking fails
+- Files changed: src/services/RuleProcessor.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Empty string from getDiffContent means no .git or git failed (intentional design)
+  - Always check for empty diff before processing to avoid unnecessary work
+  - Wrap pattern checking in try/catch even though implementation is safe (defensive coding)
+  - Log warnings for graceful failures - users need visibility into what's happening
+---
+
+## [Sat Jan 10 13:50] - US-005
+Thread: https://ampcode.com/threads/T-019ba902-e075-72ae-a5ef-ad44244ad180
+- Exported FlaggedFile and RuleResult interfaces from RuleProcessor for use in controllers
+- Updated CommandRunner to capture and process ruleResults
+- Created outputFlaggedFilesSummary() method to display violations
+- Output includes summary of total files per error level with emoji headers
+- Each flagged file shows: filename [errorLevel] - Rule: pattern, Pattern: details
+- Sorted by error level (error > warn > info) then alphabetically by filename
+- Handles all pattern types (RegExp, Array, String) when displaying
+- Files changed: src/services/RuleProcessor.ts, src/controllers/CommandRunner.ts
+- Quality checks: build ✓, lint ✓, typecheck ✓
+- **Learnings for future iterations:**
+  - Export interfaces if they're needed by other modules (controllers, handlers, etc.)
+  - Use descriptive variable names (patternString not patternStr) - enforced by linter
+  - Avoid Array.reduce() - use loops for clarity (unicorn/no-array-reduce rule)
+  - Non-null assertion (!) requires type guards to satisfy TypeScript
+  - Logger.print() outputs on same line, Logger.println() adds newline
+---
+
+## [Sat Jan 10 18:50] - US-001
+Thread: https://ampcode.com/threads/T-019ba93e-d58e-77bb-b969-3e08dcbca6e6
+- Added getDiffContent(commitReference: string = 'HEAD'): string to src/helpers/git.ts
+- Implements proper error handling: throws Error if git fails or .git not found
+- Returns stdout as string (no empty string fallback - errors propagate)
+- Updated DiffProcessor to import and use getDiffContent() from git helper
+- Removed spawnSync import from DiffProcessor (now only imports getDiffContent)
+- Renamed parameter from commitRef to commitReference to fix linting (unicorn/prevent-abbreviations rule)
+- Files changed: src/helpers/git.ts, src/services/DiffProcessor.ts
+- Quality checks: build ✓, lint ✓ (ESLint, Prettier, TSC)
+- Commit: feat: US-001 - Consolidate Git Operations into Helper
+- **Learnings for future iterations:**
+  - Parameter names must be descriptive (commitRef → commitReference) per unicorn/prevent-abbreviations rule
+  - Error handling in git operations: throw errors instead of returning empty strings for centralized handling
+  - The codebase now expects errors to propagate up to the caller for centralized error handling
+  - getDiffContent is now the single source of truth for all git diff operations
+---
+
+## [Sat Jan 10 13:59] - US-002
+Thread: https://ampcode.com/threads/T-019ba945-80c6-7698-a4f5-71acebf40874
+- Vitest infrastructure already fully configured (vitest ^4.0.16 installed as dev dependency)
+- vitest.config.mjs exists with proper TypeScript configuration and test patterns
+- npm scripts test:unit and test:unit:coverage already configured and functional
+- Created example test file tests/unit/src/helpers/git.spec.ts with TypeScript and vitest globals
+- Verified test infrastructure works: tests pass, coverage reports generate, all quality checks pass
+- Files changed: tests/unit/src/helpers/git.spec.ts, ralph/prd.json
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓
+- Commit: feat: US-002 - Set Up Vitest Infrastructure
+- **Learnings for future iterations:**
+  - Vitest test files use .spec.ts naming convention (not .test.ts) per vitest.config.mjs
+  - Tests are located in tests/unit/src/ mirroring the src/ directory structure
+  - Vitest globals are auto-imported (describe, it, expect, vi, beforeEach, etc.) via unplugin-auto-import
+  - Test files automatically get full TypeScript support and inference
+  - npm run test:unit runs with coverage enabled by default in this project
+---
+
+## [Sat Jan 10 19:07] - US-003
+Thread: https://ampcode.com/threads/T-019ba94c-8c6d-7664-aec1-6c7dada48583
+- Created src/helpers/patternMatcher.ts with hasPatternMatch(pattern, content): boolean
+- Function handles RegExp, string[], and string patterns uniformly
+- Updated DiffProcessor.hasPatternInDiff() to use the utility function
+- Updated RuleProcessor.findFilesWithPattern() to use the utility function
+- Removed private hasPatternMatch() method from RuleProcessor
+- Removed duplicate pattern matching code from both services
+- Created comprehensive unit tests in tests/unit/src/helpers/patternMatcher.spec.ts (28 tests)
+- Tests cover: string patterns, RegExp patterns, array patterns, edge cases, integration scenarios
+- Files changed: src/helpers/patternMatcher.ts (new), src/services/DiffProcessor.ts, src/services/RuleProcessor.ts, tests/unit/src/helpers/patternMatcher.spec.ts (new), ralph/prd.json
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (31 tests pass)
+- Commit: feat: US-003 - Extract Reusable Pattern Matching Utility
+- **Learnings for future iterations:**
+  - Pattern matching logic should be centralized in helpers/patternMatcher.ts for reuse
+  - The hasPatternMatch function handles empty content by returning false (defensive)
+  - Array patterns use Array.some() for short-circuit evaluation (efficient)
+  - Tests should avoid RegExp object comparisons (use === instead of pattern === /regex/)
+  - All test files should use .spec.ts naming convention in tests/unit/ directory
+  ---
+
+  ## [Sat Jan 10 14:17] - US-004
+  Thread: https://ampcode.com/threads/T-019ba952-772d-750a-826e-a9ad4cd1c1b2
+  - Created src/services/Reporter.ts with Reporter class for batched output collection
+  - Implemented methods: onRuleProcessed(rule), onFileMatched(file), onViolation(file, rule, level)
+  - Implemented report(): void that outputs collected violations by error level with flagged files list
+  - Reporter uses Set for files (prevents duplicates) and array for violations (preserves order)
+  - Output format: total violations count, grouped by level (Error > Warning > Info), sorted files
+  - Created comprehensive test suite with 12 tests covering all methods and scenarios
+  - Tests mock Logger, verify method calls, and validate report output structure
+  - Files changed: src/services/Reporter.ts (new), tests/unit/src/services/Reporter.spec.ts (new), ralph/prd.json
+  - Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (43 tests total)
+  - Commit: feat: US-004 - Create Reporter Service
+  - **Learnings for future iterations:**
+  - Use Level enum (Level.Error, Level.Warning, Level.Info) - not string literals
+  - Set is ideal for deduplicating files; array for violations to maintain order
+  - Report should group by error level in consistent order: Error > Warning > Info
+  - Use toSorted() instead of sort() (ESLint unicorn/no-array-sort rule)
+  - Use spread operator [...set] instead of Array.from() (ESLint unicorn/prefer-spread rule)
+  - Mock entire Logger module in tests (not individual methods) for cleaner test setup
+  - Logger.success() for "no violations" case; Logger.println() for regular output
+  ---""  
+"## [Sat Jan 10 14:38] - US-005"  
+"Thread: https://ampcode.com/threads/T-019ba961-b338-7608-901d-a68727bbf329"  
+"- Removed try-catch from getDiffContent() in RuleProcessor.processRules() - let errors propagate"  
+"- Removed Logger.warn() calls for getDiffContent errors in processRules()"  
+"- Updated processRule() to remove try-catch around hasPatternInDiff() calls"  
+"- Updated findFilesWithPattern() to remove try-catch around readHeadOfFile() calls"  
+"- Now all errors from git operations, file reads, and pattern matching propagate to caller"  
+"- Created comprehensive unit tests for DiffProcessor with 10 test cases covering all pattern types"  
+"- Files changed: src/services/DiffProcessor.ts, src/services/RuleProcessor.ts, tests/unit/src/services/DiffProcessor.spec.ts (new)"  
+"- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (63 tests pass)"  
+"- Commit: feat: US-005 - Refactor DiffProcessor to Throw Errors"  
+"- **Learnings for future iterations:**"  
+"  - Error handling has shifted from defensive (catching and logging) to propagating errors up"  
+"  - Errors are now the responsibility of the caller (main.ts) to handle via centralized error handler"  
+"  - DiffProcessor now caches error-free diff content; errors thrown during getDiffContent prevent caching"  
+"  - Tests use mocking for DiffProcessor and file module to verify error propagation"  
+"  - Vitest spy/mock patterns: vi.mocked() for module functions, vi.fn() for method mocks"  
+"  - Test assertion .rejects.toThrow() verifies error propagation from async functions"  
+"---"
+
+## [Sun Jan 11 01:14] - US-006
+Thread: https://ampcode.com/threads/T-019bab9d-f304-77a8-97a5-f04126280773
+- Removed try-catch blocks from findFilesWithPattern() - errors from readHeadOfFile and hasPatternMatch now propagate
+- Removed Logger.warn() calls that were catching errors
+- Updated processRules() to include comment documenting that getDiffContent errors propagate
+- All error handling now defers to caller for centralized handling
+- Created fs mock utility in tests/mocks/fs.ts using memfs for proper file existence mocking
+- Created comprehensive unit tests for RuleProcessor error handling (5 test suites with 6 tests)
+- Tests verify errors from getDiffContent propagate without being caught
+- Files changed: src/services/RuleProcessor.ts, tests/mocks/fs.ts (new), tests/unit/src/services/RuleProcessor.spec.ts (new)
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (61 tests pass)
+- Commit: feat: Refactor RuleProcessor Error Handling
+- **Learnings for future iterations:**
+  - RuleProcessor now has no try-catch blocks - all errors propagate to caller (processRules caller)
+  - The fs mock in tests/mocks/fs.ts with memfs allows proper mocking of file system operations in tests
+  - Test files should import mocks/fs.js side-effect import FIRST to ensure vi.mock is hoisted before other imports
+  - getDiffContent errors and file read errors both propagate, giving caller full control over error handling
+  - Tests with "find pattern" require file existence checks which use real fs, so tests focus on getDiffContent error propagation
+  ---
+
+  ## [Sun Jan 11 02:35] - US-007
+  Thread: https://ampcode.com/threads/T-019babb8-fae4-730c-ae9a-72f038890be6
+  - Added Reporter injection into RuleProcessor constructor (optional parameter with default instance creation)
+  - Also added optional DiffProcessor injection parameter to RuleProcessor for better testability
+  - Updated RuleProcessor.processRules() to call reporter.onRuleProcessed(rule) after processing each rule
+  - Updated RuleProcessor.processRule() to call reporter.onFileMatched(file) for each file in filesWithMatches
+  - Updated RuleProcessor.processRule() to call reporter.onViolation(file, rule, level) for each flagged violation
+  - Removed Logger import and Logger.info() calls from RuleProcessor
+  - Updated CommandRunner to instantiate Reporter and pass it to RuleProcessor constructor
+  - Created comprehensive unit tests for Reporter integration (7 test suites with 16 tests total)
+  - Tests verify: constructor injection, onRuleProcessed callbacks, onFileMatched callbacks, onViolation callbacks, error propagation
+  - All tests pass with proper mocking of fs, DiffProcessor, and helper functions
+  - Files changed: src/services/RuleProcessor.ts, src/controllers/CommandRunner.ts, tests/unit/src/services/RuleProcessor.spec.ts
+  - Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (69 tests pass)
+  - **Learnings for future iterations:**
+  - DiffProcessor injection as optional parameter improves testability
+  - Spy on real Reporter instance methods instead of creating pure mocks (more accurate testing)
+  - mocks/fs.js module-level mock setup requires careful sequencing - configure mocks before vi.clearAllMocks()
+  - Partial<Type> is useful for mock objects that don't implement all properties
+  - Reporter methods should be called for each file processed, not just flagged violations
+  ---
+
+## [Sun Jan 11 14:30] - US-008
+Thread: AMP_CURRENT_THREAD_ID
+- Refactored CommandRunner to use Reporter service for centralized output handling
+- Removed outputFlaggedFilesSummary() method - Reporter.report() now handles all violation output
+- Removed unused RuleResult import from CommandRunner
+- Updated error checking to use falsy check (\!result) instead of null check for better type safety
+- Created comprehensive unit tests in tests/unit/src/controllers/CommandRunner.spec.ts (4 test suites)
+- Tests verify: Reporter.report() is called after processing, config not found throws error, getDiffContent errors propagate, exit code handling
+- All tests use proper Level enum values and schema-compliant config format
+- Files changed: src/controllers/CommandRunner.ts, tests/unit/src/controllers/CommandRunner.spec.ts (new)
+- Quality checks: build ✓, lint ✓, typecheck ✓, tests ✓ (73 tests pass)
+- Commit: feat: Integrate Reporter into CommandRunner
+- **Learnings for future iterations:**
+  - cosmiconfig returns null (not undefined) when config not found - use falsy check for cleaner code
+  - eslint-disable-next-line unicorn/no-null required when testing with null values from external APIs
+  - CommandRunner delegates all output to Reporter - no direct Logger calls for violations
+  - Error propagation verified: getDiffContent errors, config parsing errors all propagate to main.ts
+  - handleError() in main.ts provides centralized error handling with exit code 1
+  - Config schema uses Level enum values (Level.Error, Level.Warning, Level.Info) not strings
+  - Config schema uses 'files' property (not 'paths') for glob patterns
+---

@@ -10,7 +10,8 @@
       "Skill(commit-change)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(printf:*)"
+      "Bash(printf:*)",
+      "Bash(test:*)"
     ]
   }
 }
