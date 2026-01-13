@@ -50,5 +50,11 @@ export class Reporter {
       }
       console.log(''); // Blank line between file sections
     }
+
+    // Display summary footer with violation counts
+    console.log(''); // Blank line before footer
+    const errorCount = this.violations.filter((v) => v.level === Level.Error).length;
+    const warningCount = this.violations.filter((v) => v.level === Level.Warning).length;
+    console.log(`${errorCount} Error(s), ${warningCount} Warning(s)`);
   }
 }

@@ -42,23 +42,24 @@ Execute the next incomplete task from the Ralph PRD and update progress.
    - Run `npm run build` to verify all workspaces build
    - Run `npm run test` if tests exist for this area
 
-6. **Commit Changes**:
+6. **Update PRD**:
+
+- Open `ralph/prd.json`
+- Set `passes: true` for the completed story
+- Save the file
+
+7. **Document in Progress Log**:
+
+- Append to `ralph/progress.txt` (never replace)
+- Format:
+
+8. **Commit Changes**:
    - Load the `commit-change` skill
    - Follow the commit message format from INSTRUCTIONS.md
-   - Use message format: `feat: [Story ID] - [Story Title]`
-
-7. **Update PRD**:
-   - Open `ralph/prd.json`
-   - Set `passes: true` for the completed story
-   - Save the file
-
-8. **Document in Progress Log**:
-   - Append to `ralph/progress.txt` (never replace)
-   - Format:
+   - Use message format: `feat: [Story Title]`
 
 ```
 ## [Date/Time] - [Story ID]
-Thread: <AMP_CURRENT_THREAD_ID>
 - What was implemented
 - Files changed
 - Quality checks passed

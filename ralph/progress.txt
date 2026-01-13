@@ -2,3 +2,54 @@
 # Feature: ralph/scanva-ux-improvements
 # Started: 2026-01-12
 
+## 2026-01-12 22:38 - US-013
+Thread: 01JHDQVVV6MQP6R8EAB75N72H7
+- Removed old summary-first output format from Reporter.ts
+- Removed 'Total violations' count, 'ERROR/WARNING' sections, and 'Flagged files' list
+- Updated all related tests in Reporter.spec.ts to reflect new behavior
+- Reporter now only shows success message when no violations exist
+- All quality checks passed (check, build, test:unit)
+- Files changed: src/services/Reporter.ts, tests/unit/src/services/Reporter.spec.ts
+- **Learnings for future iterations:**
+  - The Reporter data structures (violations array, fileMatches set, rules set) remain intact for future output implementations
+  - Tests were updated to verify the absence of output rather than specific output format
+  - The report() method now has minimal logic - just returns early when violations exist
+  - Next user story (US-010) will add the new file-focused output format with ASCII indicators
+---
+
+## 2026-01-12 22:42 - US-010
+Thread: 01JHDRATPE5BWBP90FB9E99NZ8
+- Implemented file-grouped violation output with ASCII indicators in Reporter.ts
+- Each violation now displays with ● (U+25CF) for errors and ▲ (U+25B2) for warnings
+- Violations grouped by file path using Map data structure
+- Each file shown as section header on its own line
+- Blank lines separate file sections for visual clarity
+- Added comprehensive test coverage with console.log spy
+- All quality checks passed (check, build, test:unit)
+- Files changed: src/services/Reporter.ts, tests/unit/src/services/Reporter.spec.ts
+- **Learnings for future iterations:**
+  - Used Map to group violations by file path efficiently
+  - console.log for output required mocking in tests with vi.spyOn
+  - ASCII symbols (● and ▲) render correctly in terminals
+  - Format: '{indicator} {Error|Warning} : {rule_pattern}'
+  - Next user story (US-012) will add summary footer with violation counts
+---
+
+## 2026-01-12 22:46 - US-012
+Thread: <AMP_CURRENT_THREAD_ID>
+- Added summary footer with violation counts to Reporter.ts
+- Footer displays format: '{error_count} Error(s), {warning_count} Warning(s)'
+- Footer appears after all file sections when violations exist
+- Blank line added before footer for visual separation per acceptance criteria
+- Counts violations using filter() on violations array by Level.Error and Level.Warning
+- Added three test cases covering mixed violations, only errors, and only warnings
+- Enhanced primary test to verify blank line before footer
+- All quality checks passed (check, build, test:unit)
+- Files changed: src/services/Reporter.ts, tests/unit/src/services/Reporter.spec.ts
+- **Learnings for future iterations:**
+  - Summary footer counts computed directly from violations array using filter()
+  - Blank line before footer provides visual separation from file sections
+  - Format uses parentheses: 'Error(s)' and 'Warning(s)' for grammatical consistency
+  - Next user story (US-009) will fix exit codes for validation errors
+---
+

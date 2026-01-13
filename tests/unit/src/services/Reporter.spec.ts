@@ -256,5 +256,56 @@ describe('Reporter', () => {
       expect(calls).toContain('● Error : pattern-1');
       expect(calls).toContain('● Error : pattern-2');
     });
+
+    it('should display summary footer with violation counts', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      const calls = consoleLogSpy.mock.calls.map((call) => call[0]);
+      // Check blank line before footer
+      const footerIndex = calls.indexOf('2 Error(s), 1 Warning(s)');
+      expect(footerIndex).toBeGreaterThan(0);
+      expect(calls[footerIndex - 1]).toBe('');
+      expect(consoleLogSpy).toHaveBeenCalledWith('2 Error(s), 1 Warning(s)');
+    });
+
+    it('should display summary footer with correct counts for only errors', () => {
+      const errorRule: Rule = {
+        pattern: 'error-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file2.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file3.ts', errorRule, Level.Error);
+      reporter.report();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('3 Error(s), 0 Warning(s)');
+    });
+
+    it('should display summary footer with correct counts for only warnings', () => {
+      const warningRule: Rule = {
+        pattern: 'warning-pattern',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      reporter.onViolation('src/file2.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('0 Error(s), 2 Warning(s)');
+    });
   });
 });
