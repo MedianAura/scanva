@@ -20,6 +20,7 @@ program
 export async function run(): Promise<number> {
   Logger.clear();
   Logger.title('Scanva - Validation Tools');
+  Logger.separator();
 
   try {
     await program.parseAsync();

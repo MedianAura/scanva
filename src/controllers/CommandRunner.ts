@@ -1,7 +1,6 @@
 import { cosmiconfig, type CosmiconfigResult } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
 import { getFilesFromCommit } from '../helpers/git.js';
-import { Logger } from '../helpers/logger.js';
 import { ConfigurationNotFoundError } from '../models/Errors.js';
 import { Reporter } from '../services/Reporter.js';
 import { RuleProcessor } from '../services/RuleProcessor.js';
@@ -24,8 +23,6 @@ export class CommandRunner {
 
     // Output all collected violations
     const hasErrors = reporter.report();
-
-    Logger.success('Job executed successfully');
 
     // Return exit code 1 if errors exist, 0 otherwise
     return hasErrors ? 1 : 0;

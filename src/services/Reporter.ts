@@ -1,4 +1,7 @@
+import chalk from 'chalk';
+import path from 'node:path';
 import { Level } from '../enums/Level.js';
+import { getGitRoot } from '../helpers/git.js';
 import { Logger } from '../helpers/logger.js';
 import { type Rule } from '../validators/ConfigSchemas.js';
 
@@ -40,22 +43,27 @@ export class Reporter {
     }
 
     // Display violations grouped by file
+    const gitRoot = getGitRoot();
     for (const [file, fileViolations] of violationsByFile) {
-      console.log(file);
+      const relativePath = path.relative(gitRoot, file);
+      Logger.println(chalk.underline(relativePath));
       for (const violation of fileViolations) {
-        const indicator = violation.level === Level.Error ? '●' : '▲';
-        const levelText = violation.level === Level.Error ? 'Error' : 'Warning';
-        const ruleDescription = violation.rule.pattern;
-        console.log(`${indicator} ${levelText} : ${ruleDescription}`);
+        const indicator = violation.level === Level.Error ? chalk.red('✕') : chalk.yellow('△');
+        const message = violation.rule.pattern;
+        const ruleId = chalk.dim(violation.rule.pattern);
+        Logger.println(`${indicator}  ${message.padEnd(40)} ${ruleId}`);
       }
-      console.log(''); // Blank line between file sections
+      Logger.skipLine();
     }
 
     // Display summary footer with violation counts
-    console.log(''); // Blank line before footer
     const errorCount = this.violations.filter((v) => v.level === Level.Error).length;
     const warningCount = this.violations.filter((v) => v.level === Level.Warning).length;
-    console.log(`${errorCount} Error(s), ${warningCount} Warning(s)`);
+
+    const errorText = chalk.red(`${errorCount} error${errorCount === 1 ? '' : 's'}`);
+    const warningText = chalk.yellow(`${warningCount} warning${warningCount === 1 ? '' : 's'}`);
+    Logger.println(`${errorText}`);
+    Logger.println(`${warningText}`);
 
     // Return true if there are errors (for exit code)
     return errorCount > 0;
