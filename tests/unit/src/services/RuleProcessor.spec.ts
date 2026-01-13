@@ -1,17 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Side effect: mocks/fs.js sets up fs mocking via vi.mock - MUST be imported first
-import { mock_Fs } from '../../../mocks/fs.js';
+import { mock_Fs } from '@mocks/fs.js';
 
-vi.mock('../../../../src/helpers/file.js');
-vi.mock('../../../../src/helpers/patternMatcher.js');
+vi.mock('@src/helpers/file.js');
+vi.mock('@src/helpers/patternMatcher.js');
 
-import * as fileHelper from '../../../../src/helpers/file.js';
-import * as patternMatcher from '../../../../src/helpers/patternMatcher.js';
-import { Level } from '../../../../src/index.js';
-import { type ScanvaConfig } from '../../../../src/index.js';
-import { DiffProcessor } from '../../../../src/services/DiffProcessor.js';
-import { Reporter } from '../../../../src/services/Reporter.js';
-import { RuleProcessor } from '../../../../src/services/RuleProcessor.js';
+import { Level } from '@src/enums/Level.js';
+import * as fileHelper from '@src/helpers/file.js';
+import * as patternMatcher from '@src/helpers/patternMatcher.js';
+import { type ScanvaConfig } from '@src/index.js';
+import { DiffProcessor } from '@src/services/DiffProcessor.js';
+import { Reporter } from '@src/services/Reporter.js';
+import { RuleProcessor } from '@src/services/RuleProcessor.js';
 
 describe('RuleProcessor', () => {
   let mockReporter: Reporter;

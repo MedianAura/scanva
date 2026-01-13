@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasPatternMatch } from '../../../../src/helpers/patternMatcher.js';
+import { hasPatternMatch } from '@src/helpers/patternMatcher.js';
 
 describe('hasPatternMatch', () => {
   describe('String pattern matching', () => {

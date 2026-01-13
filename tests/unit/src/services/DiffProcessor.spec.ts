@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import * as gitModule from '../../../../src/helpers/git.js';
-import { DiffProcessor } from '../../../../src/services/DiffProcessor.js';
 
-vi.mock('../../../../src/helpers/git.js');
+vi.mock('@src/helpers/git.js');
+
+import * as gitModule from '@src/helpers/git.js';
+import { DiffProcessor } from '@src/services/DiffProcessor.js';
 
 describe('DiffProcessor', () => {
   beforeEach(() => {

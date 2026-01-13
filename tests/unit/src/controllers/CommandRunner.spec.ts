@@ -1,18 +1,11 @@
-import '../../../mocks/fs.js';
+import '@mocks/fs.js';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CommandRunner } from '../../../../src/controllers/CommandRunner.js';
-import { Level } from '../../../../src/enums/Level.js';
-import * as git from '../../../../src/helpers/git.js';
-import { ConfigurationNotFoundError } from '../../../../src/models/Errors.js';
-import { Reporter } from '../../../../src/services/Reporter.js';
-
-vi.mock('../../../../src/helpers/git.js', () => ({
+vi.mock('@src/helpers/git.js', () => ({
   getFilesFromCommit: vi.fn(),
   getDiffContent: vi.fn(),
 }));
 
-vi.mock('../../../../src/helpers/logger.js', () => ({
+vi.mock('@src/helpers/logger.js', () => ({
   Logger: {
     clear: vi.fn(),
     title: vi.fn(),
@@ -25,7 +18,14 @@ vi.mock('../../../../src/helpers/logger.js', () => ({
   },
 }));
 
-vi.mock('../../../../src/services/Reporter.js');
+vi.mock('@src/services/Reporter.js');
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CommandRunner } from '@src/controllers/CommandRunner.js';
+import { Level } from '@src/enums/Level.js';
+import * as git from '@src/helpers/git.js';
+import { ConfigurationNotFoundError } from '@src/models/Errors.js';
+import { Reporter } from '@src/services/Reporter.js';
 
 describe('CommandRunner', () => {
   let commandRunner: CommandRunner;

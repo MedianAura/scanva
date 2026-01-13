@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 // Side effect: mocks/logger.js sets up logger mocking via vi.mock - MUST be imported first
-import { mock_Logger } from '../../../mocks/logger.js';
+import { mock_Logger } from '@mocks/logger.js';
 
-vi.mock('../../../../src/helpers/git.js', () => ({
+vi.mock('@src/helpers/git.js', () => ({
   getGitRoot: vi.fn(() => '/root'),
 }));
 
-import { Level } from '../../../../src/index.js';
-import { type Rule } from '../../../../src/index.js';
-import { Reporter } from '../../../../src/services/Reporter.js';
+import { Level } from '@src/index.js';
+import { type Rule } from '@src/index.js';
+import { Reporter } from '@src/services/Reporter.js';
 
 describe('Reporter', () => {
   let reporter: Reporter;

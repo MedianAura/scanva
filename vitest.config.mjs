@@ -1,9 +1,13 @@
+import { kitchen } from 'alias-kitchen';
 import AutoImport from 'unplugin-auto-import/vite';
 import { defineConfig } from 'vitest/config';
 
 // process.env.NODE_OPTIONS = '';
 
 export default defineConfig({
+  resolve: {
+    alias: kitchen({ recipe: 'vite' }),
+  },
   test: {
     include: ['./tests/unit/**/*.spec.ts'],
     environment: 'happy-dom',
