@@ -12,12 +12,15 @@ vi.mock('../../../../src/helpers/logger.js', () => ({
   },
 }));
 
+const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
 describe('Reporter', () => {
   let reporter: Reporter;
 
   beforeEach(() => {
     reporter = new Reporter();
     vi.clearAllMocks();
+    consoleLogSpy.mockClear();
   });
 
   describe('onRuleProcessed', () => {
@@ -173,6 +176,85 @@ describe('Reporter', () => {
       reporter.report();
 
       expect(Logger.success).not.toHaveBeenCalled();
+    });
+
+    it('should display violations grouped by file with ASCII indicators', () => {
+      const errorRule: Rule = {
+        pattern: 'test-error',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'test-warning',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file1.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file1.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('src/file1.ts');
+      expect(consoleLogSpy).toHaveBeenCalledWith('● Error : test-error');
+      expect(consoleLogSpy).toHaveBeenCalledWith('▲ Warning : test-warning');
+      expect(consoleLogSpy).toHaveBeenCalledWith('');
+    });
+
+    it('should separate file sections with blank lines', () => {
+      const rule: Rule = {
+        pattern: 'test-pattern',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/file1.ts', rule, Level.Error);
+      reporter.onViolation('src/file2.ts', rule, Level.Error);
+      reporter.report();
+
+      const calls = consoleLogSpy.mock.calls.map((call) => call[0]);
+      expect(calls).toContain('src/file1.ts');
+      expect(calls).toContain('src/file2.ts');
+      expect(calls).toContain('');
+    });
+
+    it('should use correct ASCII symbols for error and warning', () => {
+      const errorRule: Rule = {
+        pattern: 'error-test',
+        level: Level.Error,
+      };
+
+      const warningRule: Rule = {
+        pattern: 'warning-test',
+        level: Level.Warning,
+      };
+
+      reporter.onViolation('src/file.ts', errorRule, Level.Error);
+      reporter.onViolation('src/file.ts', warningRule, Level.Warning);
+      reporter.report();
+
+      const calls = consoleLogSpy.mock.calls.map((call) => call[0]);
+      expect(calls).toContain('● Error : error-test');
+      expect(calls).toContain('▲ Warning : warning-test');
+    });
+
+    it('should group multiple violations per file', () => {
+      const rule1: Rule = {
+        pattern: 'pattern-1',
+        level: Level.Error,
+      };
+
+      const rule2: Rule = {
+        pattern: 'pattern-2',
+        level: Level.Error,
+      };
+
+      reporter.onViolation('src/same-file.ts', rule1, Level.Error);
+      reporter.onViolation('src/same-file.ts', rule2, Level.Error);
+      reporter.report();
+
+      const calls = consoleLogSpy.mock.calls.map((call) => call[0]);
+      const fileHeaderCount = calls.filter((call) => call === 'src/same-file.ts').length;
+      expect(fileHeaderCount).toBe(1); // File header should appear only once
+      expect(calls).toContain('● Error : pattern-1');
+      expect(calls).toContain('● Error : pattern-2');
     });
   });
 });
